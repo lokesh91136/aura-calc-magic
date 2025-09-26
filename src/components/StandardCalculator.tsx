@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Volume2 } from 'lucide-react';
 import { useVoice } from '@/contexts/VoiceContext';
+import { useHistory } from '@/contexts/HistoryContext';
 import { useToast } from '@/hooks/use-toast';
 
 export function StandardCalculator() {
@@ -13,6 +14,7 @@ export function StandardCalculator() {
   const [waitingForNext, setWaitingForNext] = useState(false);
   
   const { isListening, startListening, stopListening, speak, isSupported } = useVoice();
+  const { addToHistory } = useHistory();
   const { toast } = useToast();
 
   const inputNumber = (num: string) => {
@@ -61,10 +63,19 @@ export function StandardCalculator() {
     
     if (previousValue !== null && operation) {
       const newValue = calculate(previousValue, inputValue, operation);
+      const calculation = `${previousValue} ${operation} ${inputValue}`;
+      
       setDisplay(String(newValue));
       setPreviousValue(null);
       setOperation(null);
       setWaitingForNext(true);
+      
+      // Save to history
+      addToHistory({
+        type: 'standard',
+        calculation,
+        result: newValue,
+      });
       
       // Speak result
       speak(`Result is ${newValue}`);
@@ -102,6 +113,14 @@ export function StandardCalculator() {
         if (!isNaN(num1) && !isNaN(num2)) {
           const result = num1 + num2;
           setDisplay(String(result));
+          
+          // Save to history
+          addToHistory({
+            type: 'standard',
+            calculation: `${num1} + ${num2}`,
+            result,
+          });
+          
           speak(`${num1} plus ${num2} equals ${result}`);
           return;
         }

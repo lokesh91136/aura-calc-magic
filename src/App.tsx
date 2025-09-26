@@ -7,6 +7,9 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VoiceProvider } from "@/contexts/VoiceContext";
+import { HistoryProvider } from "@/contexts/HistoryContext";
+import { HistoryPanel } from "@/components/HistoryPanel";
+import { AIHelperPanel } from "@/components/AIHelperPanel";
 import Index from "./pages/Index";
 import SIPPage from "./pages/SIPPage";
 import EMIPage from "./pages/EMIPage";
@@ -20,7 +23,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <VoiceProvider>
-        <TooltipProvider>
+        <HistoryProvider>
+          <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -49,8 +53,11 @@ const App = () => (
                 </div>
               </div>
             </SidebarProvider>
+            <HistoryPanel />
+            <AIHelperPanel />
           </BrowserRouter>
-        </TooltipProvider>
+          </TooltipProvider>
+        </HistoryProvider>
       </VoiceProvider>
     </ThemeProvider>
   </QueryClientProvider>

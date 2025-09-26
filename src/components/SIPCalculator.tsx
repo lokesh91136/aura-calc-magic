@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalculatorButton } from '@/components/ui/calculator-button';
+import { useHistory } from '@/contexts/HistoryContext';
 
 interface SIPResult {
   monthlyInvestment: number;
@@ -16,6 +17,7 @@ export function SIPCalculator() {
   const [duration, setDuration] = useState<string>('10');
   const [expectedReturn, setExpectedReturn] = useState<string>('12');
   const [result, setResult] = useState<SIPResult | null>(null);
+  const { addToHistory } = useHistory();
 
   const calculateSIP = () => {
     const P = parseFloat(monthlyAmount);
@@ -34,6 +36,19 @@ export function SIPCalculator() {
       totalInvested,
       maturityAmount,
       totalGains
+    });
+    
+    // Save to history
+    addToHistory({
+      type: 'sip',
+      calculation: `₹${P.toLocaleString('en-IN')}/month for ${parseFloat(duration)} years at ${parseFloat(expectedReturn)}%`,
+      result: `₹${maturityAmount.toLocaleString('en-IN')}`,
+      details: {
+        monthlyInvestment: P,
+        totalInvested,
+        maturityAmount,
+        totalGains
+      }
     });
   };
 

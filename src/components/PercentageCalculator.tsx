@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalculatorButton } from '@/components/ui/calculator-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useHistory } from '@/contexts/HistoryContext';
 
 export function PercentageCalculator() {
   const [basicValue, setBasicValue] = useState<string>('');
@@ -13,6 +14,8 @@ export function PercentageCalculator() {
   const [changeOld, setChangeOld] = useState<string>('');
   const [changeNew, setChangeNew] = useState<string>('');
   const [changeResult, setChangeResult] = useState<string>('');
+  
+  const { addToHistory } = useHistory();
 
   const calculateBasicPercentage = () => {
     const value = parseFloat(basicValue);
@@ -22,6 +25,13 @@ export function PercentageCalculator() {
     
     const result = (value * percent) / 100;
     setBasicResult(result.toString());
+    
+    // Save to history
+    addToHistory({
+      type: 'percentage',
+      calculation: `${percent}% of ${value}`,
+      result: result.toString(),
+    });
   };
 
   const calculatePercentageChange = () => {
@@ -32,6 +42,13 @@ export function PercentageCalculator() {
     
     const change = ((newVal - oldVal) / oldVal) * 100;
     setChangeResult(change.toFixed(2));
+    
+    // Save to history
+    addToHistory({
+      type: 'percentage',
+      calculation: `Change from ${oldVal} to ${newVal}`,
+      result: `${change > 0 ? '+' : ''}${change.toFixed(2)}%`,
+    });
   };
 
   return (

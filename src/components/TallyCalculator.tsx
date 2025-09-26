@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CalculatorButton } from '@/components/ui/calculator-button';
 import { Plus, Minus, Trash2 } from 'lucide-react';
+import { useHistory } from '@/contexts/HistoryContext';
 
 interface Transaction {
   id: number;
@@ -18,6 +19,7 @@ export function TallyCalculator() {
   const [inputAmount, setInputAmount] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { addToHistory } = useHistory();
 
   const addTransaction = (type: 'add' | 'subtract') => {
     const amount = parseFloat(inputAmount);
@@ -37,6 +39,14 @@ export function TallyCalculator() {
     setTransactions([transaction, ...transactions]);
     setInputAmount('');
     setDescription('');
+    
+    // Save to history
+    addToHistory({
+      type: 'tally',
+      calculation: `${type === 'add' ? '+' : '-'}${amount} (${transaction.description})`,
+      result: `Balance: ${newBalance.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`,
+      details: { transaction, newBalance, previousBalance: balance }
+    });
   };
 
   const clearAll = () => {

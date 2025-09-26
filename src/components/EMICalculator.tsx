@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalculatorButton } from '@/components/ui/calculator-button';
+import { useHistory } from '@/contexts/HistoryContext';
 
 interface EMIResult {
   emi: number;
@@ -16,6 +17,7 @@ export function EMICalculator() {
   const [interestRate, setInterestRate] = useState<string>('8.5');
   const [tenure, setTenure] = useState<string>('20');
   const [result, setResult] = useState<EMIResult | null>(null);
+  const { addToHistory } = useHistory();
 
   const calculateEMI = () => {
     const P = parseFloat(loanAmount);
@@ -34,6 +36,19 @@ export function EMICalculator() {
       totalAmount,
       totalInterest,
       principalAmount: P
+    });
+    
+    // Save to history
+    addToHistory({
+      type: 'emi',
+      calculation: `₹${P.toLocaleString('en-IN')} loan for ${parseFloat(tenure)} years at ${parseFloat(interestRate)}%`,
+      result: `₹${emi.toLocaleString('en-IN')}/month`,
+      details: {
+        emi,
+        totalAmount,
+        totalInterest,
+        principalAmount: P
+      }
     });
   };
 

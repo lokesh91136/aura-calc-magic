@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import {
   Sidebar,
@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useVoice, languageConfig } from '@/contexts/VoiceContext';
+import { useHistory } from '@/contexts/HistoryContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +29,7 @@ const calculators = [
 export function AppSidebar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, isSupported: voiceSupported } = useVoice();
+  const { setHistoryOpen, setAIHelperOpen } = useHistory();
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
@@ -102,6 +104,38 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup>
+          <SidebarGroupLabel>Tools</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start p-2"
+                    onClick={() => setHistoryOpen(true)}
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    History
+                  </Button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start p-2"
+                    onClick={() => setAIHelperOpen(true)}
+                  >
+                    <Bot className="h-4 w-4 mr-2" />
+                    AI Helper
+                  </Button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
