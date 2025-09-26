@@ -16,6 +16,7 @@ import EMIPage from "./pages/EMIPage";
 import PercentagePage from "./pages/PercentagePage";
 import TallyPage from "./pages/TallyPage";
 import MathQuizPage from "./pages/MathQuizPage";
+import CalculatorRacingPage from "./pages/CalculatorRacingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
                       <Route path="/percentage" element={<PercentagePage />} />
                       <Route path="/tally" element={<TallyPage />} />
                       <Route path="/math-quiz" element={<MathQuizPage />} />
+                      <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>
