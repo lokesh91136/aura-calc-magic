@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import {
   Sidebar,
@@ -24,6 +24,7 @@ const calculators = [
   { title: 'EMI Calculator', url: '/emi', icon: Home },
   { title: 'Percentage', url: '/percentage', icon: Percent },
   { title: 'Tally', url: '/tally', icon: List },
+  { title: 'Math Quiz', url: '/math-quiz', icon: Brain },
 ];
 
 export function AppSidebar() {
