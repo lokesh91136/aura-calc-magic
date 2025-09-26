@@ -90,6 +90,14 @@ export function StandardCalculator() {
     speak('Calculator cleared');
   };
 
+  const backspace = () => {
+    if (display.length > 1) {
+      setDisplay(display.slice(0, -1));
+    } else {
+      setDisplay('0');
+    }
+  };
+
   const handleVoiceInput = () => {
     if (isListening) {
       stopListening();
@@ -101,48 +109,83 @@ export function StandardCalculator() {
   };
 
   const parseVoiceInput = (transcript: string) => {
-    // Simple voice command parsing
-    const cleanText = transcript.replace(/[^\d+\-×÷*/=\s]/g, '');
+    // Enhanced voice command parsing
+    const cleanText = transcript.toLowerCase().trim();
     
+    // Handle different ways of saying operations
+    let processedText = cleanText
+      .replace(/plus/g, '+')
+      .replace(/add/g, '+')
+      .replace(/minus/g, '-')
+      .replace(/subtract/g, '-')
+      .replace(/times/g, '×')
+      .replace(/multiply/g, '×')
+      .replace(/multiplied by/g, '×')
+      .replace(/divided by/g, '÷')
+      .replace(/divide/g, '÷')
+      .replace(/equals/g, '=');
+
     // Handle basic math expressions
-    if (cleanText.includes('+')) {
-      const parts = cleanText.split('+');
-      if (parts.length === 2) {
-        const num1 = parseFloat(parts[0].trim());
-        const num2 = parseFloat(parts[1].trim());
-        if (!isNaN(num1) && !isNaN(num2)) {
-          const result = num1 + num2;
-          setDisplay(String(result));
-          
-          // Save to history
-          addToHistory({
-            type: 'standard',
-            calculation: `${num1} + ${num2}`,
-            result,
-          });
-          
-          speak(`${num1} plus ${num2} equals ${result}`);
-          return;
-        }
+    const operators = ['+', '-', '×', '÷'];
+    let operatorFound = null;
+    let operatorIndex = -1;
+
+    for (const op of operators) {
+      const index = processedText.indexOf(op);
+      if (index !== -1) {
+        operatorFound = op;
+        operatorIndex = index;
+        break;
+      }
+    }
+
+    if (operatorFound && operatorIndex !== -1) {
+      const leftPart = processedText.substring(0, operatorIndex).trim();
+      const rightPart = processedText.substring(operatorIndex + 1).trim();
+      
+      const num1 = parseFloat(leftPart.replace(/[^\d.]/g, ''));
+      const num2 = parseFloat(rightPart.replace(/[^\d.]/g, ''));
+      
+      if (!isNaN(num1) && !isNaN(num2)) {
+        const result = calculate(num1, num2, operatorFound);
+        setDisplay(String(result));
+        
+        // Save to history
+        addToHistory({
+          type: 'standard',
+          calculation: `${num1} ${operatorFound} ${num2}`,
+          result,
+        });
+        
+        // Speak result with operation name
+        const operationName = {
+          '+': 'plus',
+          '-': 'minus',
+          '×': 'times',
+          '÷': 'divided by'
+        }[operatorFound];
+        
+        speak(`${num1} ${operationName} ${num2} equals ${result}`);
+        return;
       }
     }
     
-    // Handle numbers
-    const number = parseFloat(cleanText);
+    // Handle single numbers
+    const number = parseFloat(cleanText.replace(/[^\d.]/g, ''));
     if (!isNaN(number)) {
       setDisplay(String(number));
       speak(`Number ${number}`);
     } else {
       toast({
         title: "Voice command not recognized",
-        description: "Try saying something like '10 plus 20'",
+        description: "Try saying something like '10 plus 20' or '5 times 3'",
       });
     }
   };
 
   const buttons = [
     { label: 'C', variant: 'clear' as const, action: clear },
-    { label: '±', variant: 'function' as const, action: () => {} },
+    { label: '⌫', variant: 'function' as const, action: backspace },
     { label: '%', variant: 'function' as const, action: () => {} },
     { label: '÷', variant: 'operator' as const, action: () => inputOperation('÷') },
     
