@@ -89,10 +89,49 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
 
   const speak = useCallback((text: string) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      console.log('Speaking text:', text, 'in language:', language);
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = language;
       utterance.rate = 0.9;
-      speechSynthesis.speak(utterance);
+      
+      // Get available voices and try to find the best match for the selected language
+      const voices = speechSynthesis.getVoices();
+      console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
+      
+      // Find voice that matches the current language
+      const matchingVoice = voices.find(voice => 
+        voice.lang === language || 
+        voice.lang.startsWith(language.split('-')[0])
+      );
+      
+      if (matchingVoice) {
+        console.log('Using voice:', matchingVoice.name, 'for language:', matchingVoice.lang);
+        utterance.voice = matchingVoice;
+      } else {
+        console.log('No matching voice found for language:', language, 'using default');
+      }
+      
+      utterance.onstart = () => console.log('Speech started');
+      utterance.onend = () => console.log('Speech ended');
+      utterance.onerror = (event) => console.log('Speech error:', event.error);
+      
+      // Ensure voices are loaded before speaking
+      if (voices.length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+          const newVoices = speechSynthesis.getVoices();
+          const newMatchingVoice = newVoices.find(voice => 
+            voice.lang === language || 
+            voice.lang.startsWith(language.split('-')[0])
+          );
+          if (newMatchingVoice) {
+            utterance.voice = newMatchingVoice;
+          }
+          speechSynthesis.speak(utterance);
+        };
+      } else {
+        speechSynthesis.speak(utterance);
+      }
     }
   }, [language]);
 

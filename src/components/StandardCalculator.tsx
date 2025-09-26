@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { CalculatorButton } from '@/components/ui/calculator-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Mic, MicOff, Volume2, Languages } from 'lucide-react';
 import { useVoice } from '@/contexts/VoiceContext';
 import { useHistory } from '@/contexts/HistoryContext';
 import { useToast } from '@/hooks/use-toast';
+import { languageConfig, type Language } from '@/contexts/VoiceContext';
 
 export function StandardCalculator() {
   const [display, setDisplay] = useState('0');
@@ -13,7 +15,7 @@ export function StandardCalculator() {
   const [operation, setOperation] = useState<string | null>(null);
   const [waitingForNext, setWaitingForNext] = useState(false);
   
-  const { isListening, startListening, stopListening, speak, isSupported } = useVoice();
+  const { isListening, language, setLanguage, startListening, stopListening, speak, isSupported } = useVoice();
   const { addToHistory } = useHistory();
   const { toast } = useToast();
 
@@ -242,23 +244,43 @@ export function StandardCalculator() {
 
           {/* Voice Controls */}
           {isSupported && (
-            <div className="flex gap-2 mb-4">
-              <Button
-                variant={isListening ? "destructive" : "secondary"}
-                size="sm"
-                onClick={handleVoiceInput}
-                className="flex-1"
-              >
-                {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-                {isListening ? 'Stop' : 'Voice'}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => speak(display)}
-              >
-                <Volume2 className="h-4 w-4" />
-              </Button>
+            <div className="space-y-3 mb-4">
+              {/* Language Selector */}
+              <div className="flex items-center gap-2">
+                <Languages className="h-4 w-4" />
+                <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(languageConfig).map(([code, config]) => (
+                      <SelectItem key={code} value={code}>
+                        {config.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Voice Control Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  variant={isListening ? "destructive" : "secondary"}
+                  size="sm"
+                  onClick={handleVoiceInput}
+                  className="flex-1"
+                >
+                  {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
+                  {isListening ? 'Stop' : 'Voice'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => speak(display)}
+                >
+                  <Volume2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
 
