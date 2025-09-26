@@ -113,89 +113,119 @@ export function StandardCalculator() {
   const parseVoiceInput = (transcript: string) => {
     console.log('Voice transcript received:', transcript);
     
-    // Enhanced voice command parsing
     const cleanText = transcript.toLowerCase().trim();
     console.log('Clean text:', cleanText);
     
-    // Handle different ways of saying operations
+    // Multi-language operation mapping
     let processedText = cleanText
+      // English
       .replace(/\bplus\b/g, '+')
       .replace(/\badd\b/g, '+')
       .replace(/\bminus\b/g, '-')
       .replace(/\bsubtract\b/g, '-')
-      .replace(/\btimes\b/g, '×')
-      .replace(/\bmultiply\b/g, '×')
-      .replace(/\bmultiplied by\b/g, '×')
-      .replace(/\bdivided by\b/g, '÷')
-      .replace(/\bdivide\b/g, '÷');
+      .replace(/\btimes\b/g, '*')
+      .replace(/\bmultiply\b/g, '*')
+      .replace(/\bmultiplied by\b/g, '*')
+      .replace(/\bdivided by\b/g, '/')
+      .replace(/\bdivide\b/g, '/')
+      .replace(/\bof\b/g, '*')
+      .replace(/\bpercent of\b/g, '% of')
+      // Hindi
+      .replace(/\bजोड़\b/g, '+')
+      .replace(/\bघटा\b/g, '-')
+      .replace(/\bगुणा\b/g, '*')
+      .replace(/\bभाग\b/g, '/')
+      .replace(/\bप्रतिशत\b/g, '%')
+      // Tamil  
+      .replace(/\bகூட்டல்\b/g, '+')
+      .replace(/\bकूत्तल्\b/g, '+')
+      .replace(/\bकोोत्तल्\b/g, '+')
+      .replace(/\bकूत्तल्\b/g, '+')
+      .replace(/\bकूत्तल्\b/g, '+')
+      .replace(/\bகழித்தல்\b/g, '-')
+      .replace(/\bபெருக்கல்\b/g, '*')
+      .replace(/\bவகுத்தல்\b/g, '/')
+      // Kannada
+      .replace(/\bಜೋಡಣೆ\b/g, '+')
+      .replace(/\bಕಳೆದುಕೊಳ್ಳುವುದು\b/g, '-')
+      .replace(/\bಗುಣಾಕಾರ\b/g, '*')
+      .replace(/\bಭಾಗಾಕಾರ\b/g, '/')
+      .replace(/\bಶೇಕಡಾ\b/g, '%')
+      // Spanish
+      .replace(/\bmás\b/g, '+')
+      .replace(/\bmenos\b/g, '-')
+      .replace(/\bpor\b/g, '*')
+      .replace(/\bdividido entre\b/g, '/')
+      .replace(/\bporciento de\b/g, '% of');
 
     console.log('Processed text:', processedText);
 
-    // Handle basic math expressions
-    const operators = ['+', '-', '×', '÷'];
-    let operatorFound = null;
-    let operatorIndex = -1;
-
-    for (const op of operators) {
-      const index = processedText.indexOf(op);
-      if (index !== -1) {
-        operatorFound = op;
-        operatorIndex = index;
-        break;
+    try {
+      // Handle percentage calculations
+      if (processedText.includes('% of') || processedText.includes('%')) {
+        const percentMatch = processedText.match(/(\d+(?:\.\d+)?)\s*%\s*(?:of\s*)?(\d+(?:\.\d+)?)/);
+        if (percentMatch) {
+          const [, percent, number] = percentMatch;
+          const result = (parseFloat(percent) / 100) * parseFloat(number);
+          setDisplay(String(result));
+          addToHistory({
+            type: 'standard',
+            calculation: `${percent}% of ${number}`,
+            result,
+          });
+          speak(String(result));
+          return;
+        }
       }
-    }
 
-    console.log('Operator found:', operatorFound, 'at index:', operatorIndex);
+      // Replace common words with operators for evaluation
+      let expression = processedText
+        .replace(/[×]/g, '*')
+        .replace(/[÷]/g, '/')
+        .replace(/\s+/g, ''); // Remove spaces
 
-    if (operatorFound && operatorIndex !== -1) {
-      const leftPart = processedText.substring(0, operatorIndex).trim();
-      const rightPart = processedText.substring(operatorIndex + 1).trim();
-      
-      console.log('Left part:', leftPart, 'Right part:', rightPart);
-      
-      const num1 = parseFloat(leftPart.replace(/[^\d.]/g, ''));
-      const num2 = parseFloat(rightPart.replace(/[^\d.]/g, ''));
-      
-      console.log('Numbers parsed:', num1, num2);
-      
-      if (!isNaN(num1) && !isNaN(num2)) {
-        const result = calculate(num1, num2, operatorFound);
-        setDisplay(String(result));
-        
-        // Save to history
-        addToHistory({
-          type: 'standard',
-          calculation: `${num1} ${operatorFound} ${num2}`,
-          result,
-        });
-        
-        // Speak result with operation name
-        const operationName = {
-          '+': 'plus',
-          '-': 'minus',
-          '×': 'times',
-          '÷': 'divided by'
-        }[operatorFound];
-        
-        speak(`${num1} ${operationName} ${num2} equals ${result}`);
+      console.log('Expression to evaluate:', expression);
+
+      // Extract and evaluate mathematical expression
+      const mathExpression = expression.match(/[\d+\-*/().%\s]+/g)?.[0];
+      if (mathExpression) {
+        // Safe evaluation using Function constructor (limited to basic math)
+        const sanitizedExpr = mathExpression.replace(/[^0-9+\-*/().%\s]/g, '');
+        if (sanitizedExpr && /^[\d+\-*/().%\s]+$/.test(sanitizedExpr)) {
+          const result = Function(`"use strict"; return (${sanitizedExpr})`)();
+          
+          if (typeof result === 'number' && !isNaN(result)) {
+            setDisplay(String(result));
+            addToHistory({
+              type: 'standard',
+              calculation: sanitizedExpr,
+              result,
+            });
+            // Simple numeric response only
+            speak(String(result));
+            return;
+          }
+        }
+      }
+
+      // Handle single numbers
+      const number = parseFloat(cleanText.replace(/[^\d.]/g, ''));
+      if (!isNaN(number) && number.toString() !== 'NaN') {
+        setDisplay(String(number));
+        speak(String(number));
         return;
       }
+
+    } catch (error) {
+      console.error('Error evaluating expression:', error);
     }
-    
-    // Handle single numbers
-    const number = parseFloat(cleanText.replace(/[^\d.]/g, ''));
-    console.log('Single number parsed:', number);
-    
-    if (!isNaN(number) && number.toString() !== 'NaN') {
-      setDisplay(String(number));
-      speak(`Number ${number}`);
-    } else {
-      console.log('No valid input found, showing error toast');
-      toast({
-        title: "Voice command not recognized",
-        description: `I heard: "${transcript}". Try saying something like "10 plus 20" or "5 times 3"`,
-      });
-    }
+
+    // If nothing worked, show error
+    console.log('No valid input found, showing error toast');
+    toast({
+      title: "Voice command not recognized",
+      description: `I heard: "${transcript}". Try saying "10 plus 20" or "50 percent of 200"`,
+    });
   };
 
   const buttons = [
