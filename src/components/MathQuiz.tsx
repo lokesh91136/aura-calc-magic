@@ -153,7 +153,7 @@ export function MathQuiz({ onBackToCalculator }: MathQuizProps) {
       });
       speak(`Game over! Your score is ${score}`);
     }
-  }, [gameState, score, addToHistory, speak]);
+  }, [gameState]); // Remove speak from dependencies to prevent multiple announcements
 
   const calculatorButtons = [
     ['7', '8', '9', 'C'],
