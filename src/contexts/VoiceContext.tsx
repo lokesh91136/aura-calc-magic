@@ -32,26 +32,52 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
   const startListening = useCallback((onResult: (text: string) => void) => {
-    if (!isSupported || typeof window === 'undefined') return;
+    if (!isSupported || typeof window === 'undefined') {
+      console.log('Speech recognition not supported or no window');
+      return;
+    }
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.log('SpeechRecognition not available');
+      return;
+    }
+    
     const recognition = new SpeechRecognition();
     
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = language;
     
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
+    recognition.onstart = () => {
+      console.log('Speech recognition started');
+      setIsListening(true);
+    };
+    
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
+      setIsListening(false);
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.log('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
     
     recognition.onresult = (event: any) => {
+      console.log('Speech recognition result event:', event);
       const transcript = event.results[0]?.transcript || '';
+      console.log('Transcript received:', transcript);
       onResult(transcript);
     };
     
-    recognition.start();
-    setRecognition(recognition);
+    try {
+      recognition.start();
+      setRecognition(recognition);
+    } catch (error) {
+      console.error('Error starting speech recognition:', error);
+      setIsListening(false);
+    }
   }, [language, isSupported]);
 
   const stopListening = useCallback(() => {

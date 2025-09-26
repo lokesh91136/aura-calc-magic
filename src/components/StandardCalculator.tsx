@@ -109,21 +109,25 @@ export function StandardCalculator() {
   };
 
   const parseVoiceInput = (transcript: string) => {
+    console.log('Voice transcript received:', transcript);
+    
     // Enhanced voice command parsing
     const cleanText = transcript.toLowerCase().trim();
+    console.log('Clean text:', cleanText);
     
     // Handle different ways of saying operations
     let processedText = cleanText
-      .replace(/plus/g, '+')
-      .replace(/add/g, '+')
-      .replace(/minus/g, '-')
-      .replace(/subtract/g, '-')
-      .replace(/times/g, '×')
-      .replace(/multiply/g, '×')
-      .replace(/multiplied by/g, '×')
-      .replace(/divided by/g, '÷')
-      .replace(/divide/g, '÷')
-      .replace(/equals/g, '=');
+      .replace(/\bplus\b/g, '+')
+      .replace(/\badd\b/g, '+')
+      .replace(/\bminus\b/g, '-')
+      .replace(/\bsubtract\b/g, '-')
+      .replace(/\btimes\b/g, '×')
+      .replace(/\bmultiply\b/g, '×')
+      .replace(/\bmultiplied by\b/g, '×')
+      .replace(/\bdivided by\b/g, '÷')
+      .replace(/\bdivide\b/g, '÷');
+
+    console.log('Processed text:', processedText);
 
     // Handle basic math expressions
     const operators = ['+', '-', '×', '÷'];
@@ -139,12 +143,18 @@ export function StandardCalculator() {
       }
     }
 
+    console.log('Operator found:', operatorFound, 'at index:', operatorIndex);
+
     if (operatorFound && operatorIndex !== -1) {
       const leftPart = processedText.substring(0, operatorIndex).trim();
       const rightPart = processedText.substring(operatorIndex + 1).trim();
       
+      console.log('Left part:', leftPart, 'Right part:', rightPart);
+      
       const num1 = parseFloat(leftPart.replace(/[^\d.]/g, ''));
       const num2 = parseFloat(rightPart.replace(/[^\d.]/g, ''));
+      
+      console.log('Numbers parsed:', num1, num2);
       
       if (!isNaN(num1) && !isNaN(num2)) {
         const result = calculate(num1, num2, operatorFound);
@@ -172,13 +182,16 @@ export function StandardCalculator() {
     
     // Handle single numbers
     const number = parseFloat(cleanText.replace(/[^\d.]/g, ''));
-    if (!isNaN(number)) {
+    console.log('Single number parsed:', number);
+    
+    if (!isNaN(number) && number.toString() !== 'NaN') {
       setDisplay(String(number));
       speak(`Number ${number}`);
     } else {
+      console.log('No valid input found, showing error toast');
       toast({
         title: "Voice command not recognized",
-        description: "Try saying something like '10 plus 20' or '5 times 3'",
+        description: `I heard: "${transcript}". Try saying something like "10 plus 20" or "5 times 3"`,
       });
     }
   };
