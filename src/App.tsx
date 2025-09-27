@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +9,6 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VoiceProvider } from "@/contexts/VoiceContext";
 import { HistoryProvider } from "@/contexts/HistoryContext";
 import { HistoryPanel } from "@/components/HistoryPanel";
-import { ChatBot, ChatBotTrigger } from "@/components/ChatBot";
 import Index from "./pages/Index";
 import SIPPage from "./pages/SIPPage";
 import EMIPage from "./pages/EMIPage";
@@ -22,55 +20,49 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <VoiceProvider>
-          <HistoryProvider>
-            <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <SidebarProvider>
-                <div className="flex min-h-screen w-full">
-                  <AppSidebar />
-                  <div className="flex-1">
-                    <header className="h-16 flex items-center border-b border-border/20 bg-gradient-background/95 backdrop-blur-sm sticky top-0 z-10">
-                      <SidebarTrigger className="ml-4" />
-                      <div className="flex-1 text-center">
-                        <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                          AuraCalc
-                        </h1>
-                      </div>
-                    </header>
-                    <main className="flex-1 overflow-auto">
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/sip" element={<SIPPage />} />
-                        <Route path="/emi" element={<EMIPage />} />
-                        <Route path="/percentage" element={<PercentagePage />} />
-                        <Route path="/tally" element={<TallyPage />} />
-                        <Route path="/math-quiz" element={<MathQuizPage />} />
-                        <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </main>
-                  </div>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <VoiceProvider>
+        <HistoryProvider>
+          <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <SidebarProvider>
+              <div className="flex min-h-screen w-full">
+                <AppSidebar />
+                <div className="flex-1">
+                  <header className="h-16 flex items-center border-b border-border/20 bg-gradient-background/95 backdrop-blur-sm sticky top-0 z-10">
+                    <SidebarTrigger className="ml-4" />
+                    <div className="flex-1 text-center">
+                      <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+                        AuraCalc
+                      </h1>
+                    </div>
+                  </header>
+                  <main className="flex-1 overflow-auto">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/sip" element={<SIPPage />} />
+                      <Route path="/emi" element={<EMIPage />} />
+                      <Route path="/percentage" element={<PercentagePage />} />
+                      <Route path="/tally" element={<TallyPage />} />
+                      <Route path="/math-quiz" element={<MathQuizPage />} />
+                      <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
                 </div>
-              </SidebarProvider>
-              <HistoryPanel />
-              <ChatBot isOpen={isChatBotOpen} onOpenChange={setIsChatBotOpen} />
-              <ChatBotTrigger onClick={() => setIsChatBotOpen(true)} />
-            </BrowserRouter>
-            </TooltipProvider>
-          </HistoryProvider>
-        </VoiceProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
-};
+              </div>
+            </SidebarProvider>
+            <HistoryPanel />
+          </BrowserRouter>
+          </TooltipProvider>
+        </HistoryProvider>
+      </VoiceProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
 
 export default App;

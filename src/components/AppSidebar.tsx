@@ -1,5 +1,6 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useVoice, languageConfig } from '@/contexts/VoiceContext';
 import { useHistory } from '@/contexts/HistoryContext';
+import { ChatBot } from '@/components/ChatBot';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +34,7 @@ export function AppSidebar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, isSupported: voiceSupported } = useVoice();
   const { setHistoryOpen } = useHistory();
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
@@ -126,10 +129,24 @@ export function AppSidebar() {
                   </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start p-2"
+                    onClick={() => setIsChatBotOpen(true)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Calculator Chatbot
+                  </Button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      <ChatBot isOpen={isChatBotOpen} onOpenChange={setIsChatBotOpen} />
     </Sidebar>
   );
 }

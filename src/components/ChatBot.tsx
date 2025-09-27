@@ -4,14 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-import { Send, Bot, User, MessageCircle, Volume2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Send, Bot, User, MessageCircle, Volume2, Calculator, ArrowLeft, Lightbulb } from 'lucide-react';
 import { useVoice } from '@/contexts/VoiceContext';
+import { Link } from 'react-router-dom';
 
 interface ChatMessage {
   id: string;
-  type: 'user' | 'bot';
+  type: 'user' | 'bot' | 'challenge' | 'suggestion';
   content: string;
   timestamp: Date;
+  isCorrect?: boolean;
+  suggestion?: string;
 }
 
 interface ChatBotProps {
@@ -25,12 +29,13 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
     {
       id: '1',
       type: 'bot',
-      content: 'Hello! I\'m your AuraCalc assistant. I can help with calculator questions, math problems, and financial calculations. What would you like to calculate?',
+      content: 'Hello! I\'m your AuraCalc assistant. I can help with calculator questions, math problems, EMI/SIP calculations, and more. Try asking me to calculate something or say "challenge me" for a quick math question!',
       timestamp: new Date(),
     }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [currentChallenge, setCurrentChallenge] = useState<{question: string, answer: number} | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -63,37 +68,61 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
     // Simulate typing delay
     setTimeout(() => {
       const response = generateBotResponse(input.trim());
-      const botMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        type: 'bot',
-        content: response,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [...prev, response]);
       setIsTyping(false);
       
       // Optional speech synthesis
-      speak(response);
+      speak(response.content);
     }, 800);
   };
 
-  const evaluateArithmetic = (expression: string): string | null => {
-    try {
-      // Clean the expression - remove spaces and validate characters
-      const cleanExpr = expression.replace(/\s/g, '');
-      
-      // Only allow numbers, operators, parentheses, and decimal points
-      if (!/^[0-9+\-*/().]+$/.test(cleanExpr)) {
-        return null;
-      }
+  // Advanced math functions
+  const factorial = (n: number): number => {
+    if (n < 0) return NaN;
+    if (n === 0 || n === 1) return 1;
+    return n * factorial(n - 1);
+  };
 
-      // Prevent dangerous operations
-      if (cleanExpr.includes('**') || cleanExpr.includes('Math') || cleanExpr.includes('eval')) {
+  const evaluateAdvancedMath = (expression: string): string | null => {
+    try {
+      let expr = expression.toLowerCase().replace(/\s/g, '');
+      
+      // Handle special functions
+      expr = expr.replace(/sqrt\(([^)]+)\)/g, (match, num) => {
+        const n = parseFloat(num);
+        return Math.sqrt(n).toString();
+      });
+      
+      expr = expr.replace(/square\(([^)]+)\)/g, (match, num) => {
+        const n = parseFloat(num);
+        return (n * n).toString();
+      });
+      
+      expr = expr.replace(/pow\(([^,]+),([^)]+)\)/g, (match, base, exp) => {
+        const b = parseFloat(base);
+        const e = parseFloat(exp);
+        return Math.pow(b, e).toString();
+      });
+      
+      expr = expr.replace(/factorial\(([^)]+)\)/g, (match, num) => {
+        const n = parseInt(num);
+        return factorial(n).toString();
+      });
+      
+      // Handle power operator (^)
+      expr = expr.replace(/([0-9.]+)\^([0-9.]+)/g, (match, base, exp) => {
+        const b = parseFloat(base);
+        const e = parseFloat(exp);
+        return Math.pow(b, e).toString();
+      });
+      
+      // Only allow safe characters
+      if (!/^[0-9+\-*/().]+$/.test(expr)) {
         return null;
       }
 
       // Use Function constructor for safe evaluation
-      const result = new Function('return ' + cleanExpr)();
+      const result = new Function('return ' + expr)();
       
       if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
         return result.toString();
@@ -105,54 +134,156 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
     }
   };
 
-  const generateBotResponse = (query: string): string => {
+  const generateChallenge = (): {question: string, answer: number} => {
+    const operations = ['+', '-', '*', '/'];
+    const num1 = Math.floor(Math.random() * 20) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const op = operations[Math.floor(Math.random() * operations.length)];
+    
+    let question = `${num1} ${op} ${num2}`;
+    let answer: number;
+    
+    switch (op) {
+      case '+': answer = num1 + num2; break;
+      case '-': answer = num1 - num2; break;
+      case '*': answer = num1 * num2; break;
+      case '/': answer = Math.round((num1 / num2) * 100) / 100; break;
+      default: answer = 0;
+    }
+    
+    return { question, answer };
+  };
+
+  const getStepByStepGuidance = (type: string): string => {
+    switch (type) {
+      case 'emi':
+        return 'Step-by-step EMI calculation:\n1. Convert annual interest rate to monthly (divide by 12)\n2. Apply formula: EMI = P × r × (1+r)^n / ((1+r)^n - 1)\n3. Where P = Principal, r = monthly rate, n = tenure in months\n\nExample: ₹5,00,000 loan at 10% for 20 years\n- Monthly rate = 10%/12 = 0.833%\n- EMI = ₹4,827';
+      case 'sip':
+        return 'Step-by-step SIP calculation:\n1. Convert annual return to monthly (divide by 12)\n2. Apply formula: FV = PMT × [((1 + r)^n - 1) / r] × (1 + r)\n3. Where PMT = monthly investment, r = monthly return, n = months\n\nExample: ₹5,000/month at 12% for 10 years\n- Monthly return = 12%/12 = 1%\n- Future Value = ₹11,61,695';
+      case 'percentage':
+        return 'Step-by-step percentage calculation:\n1. Basic percentage: (Part/Whole) × 100\n2. Percentage increase: ((New-Old)/Old) × 100\n3. Find percentage of number: (Percentage/100) × Number\n\nExample: 25% of 200\n- (25/100) × 200 = 50';
+      default:
+        return 'I can provide step-by-step guidance for EMI, SIP, and percentage calculations. Which one would you like help with?';
+    }
+  };
+
+  const generateBotResponse = (query: string): ChatMessage => {
     const lowerQuery = query.toLowerCase();
     
-    // Check if it's a math expression
-    if (/[0-9+\-*/().]/.test(query)) {
-      const result = evaluateArithmetic(query);
+    // Handle challenge responses
+    if (currentChallenge && /^[0-9.-]+$/.test(query.trim())) {
+      const userAnswer = parseFloat(query.trim());
+      const isCorrect = Math.abs(userAnswer - currentChallenge.answer) < 0.01;
+      setCurrentChallenge(null);
+      
+      return {
+        id: crypto.randomUUID(),
+        type: 'bot',
+        content: isCorrect ? 
+          `Correct! The answer is ${currentChallenge.answer}. Great job! 🎉` : 
+          `Not quite. The correct answer is ${currentChallenge.answer}. Try another challenge?`,
+        timestamp: new Date(),
+        isCorrect
+      };
+    }
+    
+    // Generate challenge
+    if (lowerQuery.includes('challenge') || lowerQuery.includes('quiz')) {
+      const challenge = generateChallenge();
+      setCurrentChallenge(challenge);
+      return {
+        id: crypto.randomUUID(),
+        type: 'challenge',
+        content: `Quick Math Challenge: What is ${challenge.question}?`,
+        timestamp: new Date()
+      };
+    }
+    
+    // Step-by-step guidance
+    if (lowerQuery.includes('step') || lowerQuery.includes('guide') || lowerQuery.includes('how to')) {
+      if (lowerQuery.includes('emi')) {
+        return {
+          id: crypto.randomUUID(),
+          type: 'bot',
+          content: getStepByStepGuidance('emi'),
+          timestamp: new Date(),
+          suggestion: '/emi'
+        };
+      } else if (lowerQuery.includes('sip')) {
+        return {
+          id: crypto.randomUUID(),
+          type: 'bot',
+          content: getStepByStepGuidance('sip'),
+          timestamp: new Date(),
+          suggestion: '/sip'
+        };
+      } else if (lowerQuery.includes('percentage') || lowerQuery.includes('percent')) {
+        return {
+          id: crypto.randomUUID(),
+          type: 'bot',
+          content: getStepByStepGuidance('percentage'),
+          timestamp: new Date(),
+          suggestion: '/percentage'
+        };
+      }
+    }
+    
+    // Check if it's a math expression (including advanced functions)
+    if (/[0-9+\-*/().\^]/.test(query) || /sqrt|square|pow|factorial/i.test(query)) {
+      const result = evaluateAdvancedMath(query);
       if (result !== null) {
-        return `The answer is: ${result}`;
+        return {
+          id: crypto.randomUUID(),
+          type: 'bot',
+          content: `The answer is: ${result}`,
+          timestamp: new Date(),
+          isCorrect: true
+        };
       }
     }
 
-    // Calculator-related knowledge base
-    const responses: { [key: string]: string } = {
-      // SIP related
-      'sip': 'SIP (Systematic Investment Plan) helps you invest regularly. The formula is: Future Value = PMT × [((1 + r)^n - 1) / r] × (1 + r), where PMT is monthly payment, r is monthly return rate, and n is number of months.',
-      'investment': 'For investments, consider SIP calculators for mutual funds, or compound interest calculators for fixed deposits. The power of compounding works best over longer periods.',
-      'mutual fund': 'Use our SIP calculator to estimate mutual fund returns. Regular investments with compound growth can build significant wealth over time.',
-      
-      // EMI related
-      'emi': 'EMI calculation uses: EMI = P × r × (1+r)^n / ((1+r)^n - 1), where P is principal, r is monthly interest rate, and n is number of months.',
-      'loan': 'For loan calculations, use our EMI calculator. Consider the total interest cost, not just the monthly EMI amount when comparing loans.',
-      'mortgage': 'Home loans typically have longer tenures (15-30 years). Use EMI calculators to compare different interest rates and tenures.',
-      
-      // Percentage related
-      'percentage': 'Percentage calculations: (Part/Whole) × 100. For percentage change: ((New Value - Old Value) / Old Value) × 100.',
-      'percent': 'Common percentage calculations include discounts, profit margins, tax calculations, and investment returns.',
-      'discount': 'Discount calculation: Discounted Price = Original Price × (1 - Discount Percentage/100)',
-      'profit': 'Profit percentage = ((Selling Price - Cost Price) / Cost Price) × 100',
-      
-      // Basic math operations
-      'add': 'Addition combines numbers. Use the + operator. Example: 5 + 3 = 8',
-      'subtract': 'Subtraction finds the difference. Use the - operator. Example: 8 - 3 = 5',
-      'multiply': 'Multiplication repeats addition. Use the * operator. Example: 4 * 3 = 12',
-      'divide': 'Division splits into equal parts. Use the / operator. Example: 12 / 3 = 4',
-      
-      // Calculator usage
-      'calculator': 'AuraCalc includes Standard Calculator, SIP Calculator, EMI Calculator, Percentage Calculator, and Tally Calculator. Each is designed for specific calculation needs.',
-      'tally': 'The Tally Calculator helps track running totals and balances. Great for budgeting and keeping track of expenses.',
-      
-      // Compound interest
-      'compound': 'Compound Interest = P(1 + r/n)^(nt) - P, where P is principal, r is annual rate, n is compounding frequency, and t is time in years.',
-      'interest': 'Simple Interest = P × r × t. Compound Interest includes earning interest on interest, making it more powerful for long-term investments.',
+    // Calculator-related knowledge base with suggestions
+    const responses: { [key: string]: {content: string, suggestion?: string} } = {
+      'sip': {
+        content: 'SIP (Systematic Investment Plan) helps you invest regularly. The formula is: Future Value = PMT × [((1 + r)^n - 1) / r] × (1 + r), where PMT is monthly payment, r is monthly return rate, and n is number of months.',
+        suggestion: '/sip'
+      },
+      'emi': {
+        content: 'EMI calculation uses: EMI = P × r × (1+r)^n / ((1+r)^n - 1), where P is principal, r is monthly interest rate, and n is number of months.',
+        suggestion: '/emi'
+      },
+      'percentage': {
+        content: 'Percentage calculations: (Part/Whole) × 100. For percentage change: ((New Value - Old Value) / Old Value) × 100.',
+        suggestion: '/percentage'
+      },
+      'tally': {
+        content: 'The Tally Calculator helps track running totals and balances. Great for budgeting and keeping track of expenses.',
+        suggestion: '/tally'
+      },
+      'square': {
+        content: 'Square of a number: n² or n × n. You can also use square(number) function. Example: square(5) = 25'
+      },
+      'sqrt': {
+        content: 'Square root finds the number that when multiplied by itself gives the original number. Use sqrt(number). Example: sqrt(25) = 5'
+      },
+      'power': {
+        content: 'Power operation raises a number to an exponent. Use pow(base, exponent) or base^exponent. Example: pow(2, 3) = 8 or 2^3 = 8'
+      },
+      'factorial': {
+        content: 'Factorial of n is the product of all positive integers less than or equal to n. Use factorial(number). Example: factorial(5) = 120'
+      }
     };
 
     // Find matching response
     for (const [keyword, response] of Object.entries(responses)) {
       if (lowerQuery.includes(keyword)) {
-        return response;
+        return {
+          id: crypto.randomUUID(),
+          type: 'bot',
+          content: response.content,
+          timestamp: new Date(),
+          suggestion: response.suggestion
+        };
       }
     }
 
@@ -161,20 +292,38 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
     const isCalculatorRelated = calculatorKeywords.some(keyword => lowerQuery.includes(keyword));
 
     if (isCalculatorRelated) {
-      return 'I help with calculator and math-related questions. Try asking about specific calculations like "10 + 5", EMI calculations, SIP planning, percentages, or how to use our calculators.';
+      return {
+        id: crypto.randomUUID(),
+        type: 'bot',
+        content: 'I help with calculator and math-related questions. Try asking about specific calculations like "10 + 5", EMI calculations, SIP planning, percentages, or say "challenge me" for a quick math question!',
+        timestamp: new Date()
+      };
     }
 
     // Non-calculator related query
-    return 'I only help with calculator and math-related questions. Please ask about calculations, mathematical operations, or how to use AuraCalc\'s calculators.';
+    return {
+      id: crypto.randomUUID(),
+      type: 'bot',
+      content: 'I only help with calculator and math-related questions. Please ask about calculations, mathematical operations, or how to use AuraCalc\'s calculators.',
+      timestamp: new Date()
+    };
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:w-[400px] bg-gradient-card border-border/20 flex flex-col">
         <SheetHeader>
-          <SheetTitle className="text-foreground flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            Calculator Assistant
+          <SheetTitle className="text-foreground flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-primary" />
+              Calculator Chatbot
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/" onClick={() => onOpenChange(false)}>
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
+              </Link>
+            </Button>
           </SheetTitle>
         </SheetHeader>
         
@@ -183,35 +332,69 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
             {messages.map((message, index) => (
               <div
                 key={message.id}
-                className={`animate-fade-in`}
+                className={`animate-fade-in ${
+                  message.type === 'user' ? 'flex justify-end' : 'flex justify-start'
+                }`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <Card className={`${
+                <Card className={`max-w-[85%] ${
                   message.type === 'user' 
-                    ? 'bg-primary/10 ml-8 border-primary/20' 
-                    : 'bg-gradient-number mr-8 border-border/20'
+                    ? 'bg-primary text-primary-foreground border-primary/20' 
+                    : message.type === 'challenge'
+                    ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/30'
+                    : message.isCorrect === true
+                    ? 'bg-green-500/10 border-green-500/30'
+                    : message.isCorrect === false
+                    ? 'bg-red-500/10 border-red-500/30'
+                    : 'bg-gradient-number border-border/20'
                 } transition-all duration-300 hover:shadow-lg`}>
                   <CardContent className="p-3">
                     <div className="flex items-start gap-2">
                       {message.type === 'user' ? (
-                        <User className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <User className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                          message.type === 'user' ? 'text-primary-foreground' : 'text-primary'
+                        }`} />
+                      ) : message.type === 'challenge' ? (
+                        <Lightbulb className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       ) : (
                         <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       )}
-                      <div className="text-sm text-foreground leading-relaxed">
-                        {message.content}
+                      <div className={`text-sm leading-relaxed flex-1 ${
+                        message.type === 'user' ? 'text-primary-foreground' : 'text-foreground'
+                      }`}>
+                        <div className="whitespace-pre-line">{message.content}</div>
+                        {message.suggestion && (
+                          <div className="mt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              asChild
+                              className="h-7 text-xs"
+                            >
+                              <Link to={message.suggestion} onClick={() => onOpenChange(false)}>
+                                Open Calculator
+                              </Link>
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       {message.type === 'bot' && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 ml-auto flex-shrink-0"
+                          className="h-6 w-6 p-0 ml-2 flex-shrink-0 opacity-60 hover:opacity-100"
                           onClick={() => speak(message.content)}
                         >
                           <Volume2 className="h-3 w-3" />
                         </Button>
                       )}
                     </div>
+                    {message.type === 'challenge' && (
+                      <Badge variant="secondary" className="mt-2 text-xs">
+                        <Lightbulb className="h-3 w-3 mr-1" />
+                        Challenge Mode
+                      </Badge>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -232,36 +415,53 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
           </div>
         </ScrollArea>
 
-        <div className="flex gap-2 mt-4">
-          <Input
-            placeholder="Ask about calculations..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            className="flex-1 bg-gradient-number border-border/20 focus:border-primary/50 transition-colors"
-          />
-          <Button 
-            onClick={handleSend} 
-            disabled={!input.trim() || isTyping}
-            className="bg-gradient-primary hover:opacity-90 transition-opacity"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+        <div className="mt-4 space-y-2">
+          <div className="flex gap-1 flex-wrap">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setInput('challenge me')}
+              className="text-xs h-7"
+            >
+              Challenge Me
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setInput('how to calculate EMI step by step')}
+              className="text-xs h-7"
+            >
+              EMI Guide
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setInput('sqrt(25) + 5^2')}
+              className="text-xs h-7"
+            >
+              Advanced Math
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder={currentChallenge ? "Enter your answer..." : "Ask about calculations, math functions, or say 'challenge me'..."}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              className="flex-1 bg-gradient-number border-border/20 focus:border-primary/50 transition-colors"
+            />
+            <Button 
+              onClick={handleSend} 
+              disabled={!input.trim() || isTyping}
+              className="bg-gradient-primary hover:opacity-90 transition-opacity"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
   );
 }
 
-// Floating Chat Button Component
-export function ChatBotTrigger({ onClick }: { onClick: () => void }) {
-  return (
-    <Button
-      onClick={onClick}
-      className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-primary shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 z-50"
-      size="icon"
-    >
-      <MessageCircle className="h-6 w-6" />
-    </Button>
-  );
-}
+// Floating Chat Button Component (removed as it's now integrated in sidebar)
