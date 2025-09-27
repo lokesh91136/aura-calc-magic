@@ -15,8 +15,6 @@ interface HistoryContextType {
   clearHistory: () => void;
   isHistoryOpen: boolean;
   setHistoryOpen: (open: boolean) => void;
-  isAIHelperOpen: boolean;
-  setAIHelperOpen: (open: boolean) => void;
 }
 
 const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
@@ -24,7 +22,6 @@ const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
 export function HistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryOpen, setHistoryOpen] = useState(false);
-  const [isAIHelperOpen, setAIHelperOpen] = useState(false);
 
   const addToHistory = (item: Omit<HistoryItem, 'id' | 'timestamp'>) => {
     const newItem: HistoryItem = {
@@ -46,8 +43,6 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
       clearHistory,
       isHistoryOpen,
       setHistoryOpen,
-      isAIHelperOpen,
-      setAIHelperOpen,
     }}>
       {children}
     </HistoryContext.Provider>

@@ -31,7 +31,7 @@ const calculators = [
 export function AppSidebar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, isSupported: voiceSupported } = useVoice();
-  const { setHistoryOpen, setAIHelperOpen } = useHistory();
+  const { setHistoryOpen } = useHistory();
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
@@ -123,18 +123,6 @@ export function AppSidebar() {
                   >
                     <History className="h-4 w-4 mr-2" />
                     History
-                  </Button>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start p-2"
-                    onClick={() => setAIHelperOpen(true)}
-                  >
-                    <Bot className="h-4 w-4 mr-2" />
-                    AI Helper
                   </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
