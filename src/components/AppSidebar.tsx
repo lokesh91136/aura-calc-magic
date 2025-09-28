@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 
 const calculators = [
   { title: 'Standard', url: '/', icon: Calculator },
+  { title: 'Scientific', url: '/scientific', icon: Sigma },
   { title: 'SIP Calculator', url: '/sip', icon: TrendingUp },
   { title: 'EMI Calculator', url: '/emi', icon: Home },
   { title: 'Percentage', url: '/percentage', icon: Percent },

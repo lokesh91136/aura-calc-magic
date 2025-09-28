@@ -10,6 +10,7 @@ import { VoiceProvider } from "@/contexts/VoiceContext";
 import { HistoryProvider } from "@/contexts/HistoryContext";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import Index from "./pages/Index";
+import { ScientificCalculatorPage } from "./pages/ScientificCalculatorPage";
 import SIPPage from "./pages/SIPPage";
 import EMIPage from "./pages/EMIPage";
 import PercentagePage from "./pages/PercentagePage";
@@ -44,6 +45,7 @@ const App = () => (
                   <main className="flex-1 overflow-auto">
                     <Routes>
                       <Route path="/" element={<Index />} />
+                      <Route path="/scientific" element={<ScientificCalculatorPage />} />
                       <Route path="/sip" element={<SIPPage />} />
                       <Route path="/emi" element={<EMIPage />} />
                       <Route path="/percentage" element={<PercentagePage />} />
