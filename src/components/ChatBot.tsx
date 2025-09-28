@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Send, Bot, User, MessageCircle, Volume2, Calculator, ArrowLeft, Lightbulb } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Send, Bot, User, MessageCircle, Volume2, VolumeX, Calculator, ArrowLeft, Lightbulb, Languages } from 'lucide-react';
 import { useVoice } from '@/contexts/VoiceContext';
 import { Link } from 'react-router-dom';
 
@@ -24,7 +25,7 @@ interface ChatBotProps {
 }
 
 export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
-  const { speak } = useVoice();
+  const { speak, language, setLanguage, isSupported } = useVoice();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -35,8 +36,28 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [spokenMessages, setSpokenMessages] = useState<Set<string>>(new Set());
   const [currentChallenge, setCurrentChallenge] = useState<{question: string, answer: number} | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const newMuted = !prev;
+      if (newMuted && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        // Stop any ongoing speech when muting
+        window.speechSynthesis.cancel();
+      }
+      return newMuted;
+    });
+  };
+
+  const speakMessage = (messageId: string, content: string) => {
+    if (isMuted || !isSupported || spokenMessages.has(messageId)) return;
+    
+    speak(content);
+    setSpokenMessages(prev => new Set(prev).add(messageId));
+  };
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -71,8 +92,10 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
       setMessages(prev => [...prev, response]);
       setIsTyping(false);
       
-      // Optional speech synthesis
-      speak(response.content);
+      // Speak the response only once and if not muted
+      if (!isMuted && response.type === 'bot') {
+        speakMessage(response.id, response.content);
+      }
     }, 800);
   };
 
@@ -318,13 +341,44 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
               <Calculator className="h-5 w-5 text-primary" />
               Calculator Chatbot
             </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/" onClick={() => onOpenChange(false)}>
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={toggleMute}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/" onClick={() => onOpenChange(false)}>
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Back
+                </Link>
+              </Button>
+            </div>
           </SheetTitle>
+          
+          {/* Voice Settings */}
+          <div className="flex items-center gap-2 mt-2">
+            <Languages className="h-4 w-4 text-muted-foreground" />
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-32 h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en-US">English</SelectItem>
+                <SelectItem value="hi-IN">हिंदी</SelectItem>
+                <SelectItem value="ta-IN">தமிழ்</SelectItem>
+                <SelectItem value="kn-IN">ಕನ್ನಡ</SelectItem>
+                <SelectItem value="es-ES">Español</SelectItem>
+                <SelectItem value="fr-FR">Français</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">
+              {isMuted ? 'Speech: Off' : 'Speech: On'}
+            </span>
+          </div>
         </SheetHeader>
         
         <ScrollArea ref={scrollAreaRef} className="flex-1 mt-4">
@@ -382,10 +436,13 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 ml-2 flex-shrink-0 opacity-60 hover:opacity-100"
-                          onClick={() => speak(message.content)}
+                          className={`h-6 w-6 p-0 ml-2 flex-shrink-0 transition-opacity ${
+                            isMuted ? 'opacity-30' : 'opacity-60 hover:opacity-100'
+                          }`}
+                          onClick={() => !isMuted && speak(message.content)}
+                          disabled={isMuted}
                         >
-                          <Volume2 className="h-3 w-3" />
+                          {isMuted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
                         </Button>
                       )}
                     </div>
