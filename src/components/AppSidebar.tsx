@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useVoice, languageConfig } from '@/contexts/VoiceContext';
 import { useHistory } from '@/contexts/HistoryContext';
-import { ChatBot } from '@/components/ChatBot';
+import { CalcBot } from '@/components/CalcBot';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -138,7 +138,7 @@ export function AppSidebar() {
                     onClick={() => setIsChatBotOpen(true)}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    Calculator Chatbot
+                    CalcBot
                   </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -147,7 +147,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <ChatBot isOpen={isChatBotOpen} onOpenChange={setIsChatBotOpen} />
+      <CalcBot isOpen={isChatBotOpen} onOpenChange={setIsChatBotOpen} />
     </Sidebar>
   );
 }
