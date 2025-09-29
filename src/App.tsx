@@ -8,9 +8,11 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VoiceProvider } from "@/contexts/VoiceContext";
 import { HistoryProvider } from "@/contexts/HistoryContext";
+import { StudyProvider } from "@/contexts/StudyContext";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import Index from "./pages/Index";
 import { ScientificCalculatorPage } from "./pages/ScientificCalculatorPage";
+import StudyModePage from "./pages/StudyModePage";
 import SIPPage from "./pages/SIPPage";
 import EMIPage from "./pages/EMIPage";
 import PercentagePage from "./pages/PercentagePage";
@@ -23,9 +25,10 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <VoiceProvider>
-        <HistoryProvider>
+      <ThemeProvider>
+        <VoiceProvider>
+          <HistoryProvider>
+            <StudyProvider>
           <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -52,6 +55,7 @@ const App = () => (
                       <Route path="/tally" element={<TallyPage />} />
                       <Route path="/math-quiz" element={<MathQuizPage />} />
                       <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
+                      <Route path="/study" element={<StudyModePage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>
@@ -61,9 +65,10 @@ const App = () => (
             <HistoryPanel />
           </BrowserRouter>
           </TooltipProvider>
-        </HistoryProvider>
-      </VoiceProvider>
-    </ThemeProvider>
+            </StudyProvider>
+          </HistoryProvider>
+        </VoiceProvider>
+      </ThemeProvider>
   </QueryClientProvider>
 );
 

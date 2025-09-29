@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -29,6 +29,10 @@ const calculators = [
   { title: 'Tally', url: '/tally', icon: List },
   { title: 'Math Quiz', url: '/math-quiz', icon: Brain },
   { title: 'Calculator Racing', url: '/calculator-racing', icon: Trophy },
+];
+
+const studyTools = [
+  { title: 'Study Mode', url: '/study', icon: BookOpen },
 ];
 
 export function AppSidebar() {
@@ -106,6 +110,35 @@ export function AppSidebar() {
                     >
                       <calc.icon className="h-4 w-4" />
                       <span>{calc.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Learning</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {studyTools.map((tool) => (
+                <SidebarMenuItem key={tool.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to={tool.url} 
+                      end
+                      className={({ isActive }) =>
+                        cn(
+                          'flex items-center space-x-2 p-2 rounded-lg transition-all',
+                          isActive 
+                            ? 'bg-gradient-primary text-foreground shadow-aura' 
+                            : 'hover:bg-muted/50'
+                        )
+                      }
+                    >
+                      <tool.icon className="h-4 w-4" />
+                      <span>{tool.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
