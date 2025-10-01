@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trash2, Calculator, TrendingUp, Home, Percent, Receipt } from 'lucide-react';
+import { Trash2, Calculator, TrendingUp, Home, Percent, Receipt, GraduationCap, CalendarCheck, Award, TrendingDown, CheckCircle } from 'lucide-react';
 import { useHistory } from '@/contexts/HistoryContext';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -13,6 +13,12 @@ const typeIcons = {
   emi: Home,
   percentage: Percent,
   tally: Receipt,
+  scientific: Calculator,
+  'marks-percentage': GraduationCap,
+  attendance: CalendarCheck,
+  gpa: Award,
+  cgpa: TrendingDown,
+  grade: CheckCircle,
 };
 
 const typeLabels = {
@@ -21,6 +27,12 @@ const typeLabels = {
   emi: 'EMI',
   percentage: 'Percentage',
   tally: 'Tally',
+  scientific: 'Scientific',
+  'marks-percentage': 'Marks %',
+  attendance: 'Attendance',
+  gpa: 'GPA',
+  cgpa: 'CGPA',
+  grade: 'Grade',
 };
 
 export function HistoryPanel() {

@@ -19,6 +19,11 @@ import PercentagePage from "./pages/PercentagePage";
 import TallyPage from "./pages/TallyPage";
 import MathQuizPage from "./pages/MathQuizPage";
 import CalculatorRacingPage from "./pages/CalculatorRacingPage";
+import MarksPercentagePage from "./pages/MarksPercentagePage";
+import AttendancePage from "./pages/AttendancePage";
+import GPAPage from "./pages/GPAPage";
+import CGPAPage from "./pages/CGPAPage";
+import GradePage from "./pages/GradePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +61,11 @@ const App = () => (
                       <Route path="/math-quiz" element={<MathQuizPage />} />
                       <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
                       <Route path="/study" element={<StudyModePage />} />
+                      <Route path="/marks-percentage" element={<MarksPercentagePage />} />
+                      <Route path="/attendance" element={<AttendancePage />} />
+                      <Route path="/gpa" element={<GPAPage />} />
+                      <Route path="/cgpa" element={<CGPAPage />} />
+                      <Route path="/grade" element={<GradePage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>

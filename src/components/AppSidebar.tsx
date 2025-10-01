@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen, GraduationCap, CalendarCheck, Award, TrendingDown, CheckCircle } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -33,6 +33,14 @@ const calculators = [
 
 const studyTools = [
   { title: 'Study Mode', url: '/study', icon: BookOpen },
+];
+
+const educationTools = [
+  { title: 'Marks %', url: '/marks-percentage', icon: GraduationCap },
+  { title: 'Attendance', url: '/attendance', icon: CalendarCheck },
+  { title: 'GPA', url: '/gpa', icon: Award },
+  { title: 'CGPA', url: '/cgpa', icon: TrendingDown },
+  { title: 'Grade', url: '/grade', icon: CheckCircle },
 ];
 
 export function AppSidebar() {
@@ -123,6 +131,35 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {studyTools.map((tool) => (
+                <SidebarMenuItem key={tool.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to={tool.url} 
+                      end
+                      className={({ isActive }) =>
+                        cn(
+                          'flex items-center space-x-2 p-2 rounded-lg transition-all',
+                          isActive 
+                            ? 'bg-gradient-primary text-foreground shadow-aura' 
+                            : 'hover:bg-muted/50'
+                        )
+                      }
+                    >
+                      <tool.icon className="h-4 w-4" />
+                      <span>{tool.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Education Tools</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {educationTools.map((tool) => (
                 <SidebarMenuItem key={tool.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
