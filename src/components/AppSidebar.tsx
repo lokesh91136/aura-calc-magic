@@ -58,10 +58,9 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex flex-col space-y-4">
           <div className="text-center">
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-glow">
-              AuraCalc
+            <h1 className="text-3xl font-black bg-gradient-primary bg-clip-text text-transparent animate-glow tracking-wider">
+              AURACALC
             </h1>
-            <p className="text-xs text-muted-foreground">Beautiful calculations with style</p>
           </div>
           
           <div className="space-y-2">

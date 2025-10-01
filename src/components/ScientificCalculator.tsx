@@ -300,11 +300,11 @@ export function ScientificCalculator({ className }: ScientificCalculatorProps) {
       onClick={onClick}
       className={cn(
         'h-12 font-semibold transition-all duration-200 hover:scale-105 active:scale-95',
-        variant === 'number' && 'bg-gradient-number hover:shadow-aura',
-        variant === 'operator' && 'bg-gradient-operator hover:shadow-glow',
-        variant === 'equals' && 'bg-gradient-success hover:shadow-success',
-        variant === 'clear' && 'bg-gradient-danger hover:shadow-danger',
-        variant === 'scientific' && 'bg-gradient-secondary hover:shadow-secondary text-xs',
+        variant === 'number' && 'bg-gradient-number text-foreground shadow-aura hover:shadow-lg border border-border/20',
+        variant === 'operator' && 'bg-gradient-operator text-white shadow-operator hover:shadow-lg border-0',
+        variant === 'equals' && 'bg-gradient-equals text-white shadow-equals hover:shadow-lg border-0',
+        variant === 'clear' && 'bg-gradient-clear text-white shadow-clear hover:shadow-lg border-0',
+        variant === 'scientific' && 'bg-gradient-number text-foreground shadow-aura hover:shadow-lg border border-border/20 text-xs',
         btnClassName
       )}
       {...props}

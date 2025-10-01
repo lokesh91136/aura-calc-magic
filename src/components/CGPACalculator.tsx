@@ -45,6 +45,7 @@ export function CGPACalculator() {
 
     const total = validSemesters.reduce((sum, s) => sum + parseFloat(s.gpa), 0);
     const cgpa = total / validSemesters.length;
+    const percentage = cgpa * 9.5;
 
     const breakdown = [
       'CGPA Calculation:',
@@ -54,7 +55,11 @@ export function CGPACalculator() {
       `Total GPA: ${total.toFixed(2)}`,
       `Number of Semesters: ${validSemesters.length}`,
       `CGPA = Sum of all GPAs ÷ Number of Semesters`,
-      `CGPA = ${total.toFixed(2)} ÷ ${validSemesters.length} = ${cgpa.toFixed(2)}`
+      `CGPA = ${total.toFixed(2)} ÷ ${validSemesters.length} = ${cgpa.toFixed(2)}`,
+      '',
+      'Percentage Calculation:',
+      `Percentage = CGPA × 9.5`,
+      `Percentage = ${cgpa.toFixed(2)} × 9.5 = ${percentage.toFixed(2)}%`
     ];
 
     setResult({ cgpa, breakdown });
@@ -63,7 +68,7 @@ export function CGPACalculator() {
       type: 'cgpa',
       calculation: `${validSemesters.length} semesters`,
       result: cgpa.toFixed(2),
-      details: { semesters: validSemesters, cgpa }
+      details: { semesters: validSemesters, cgpa, percentage }
     });
   };
 
@@ -142,11 +147,19 @@ export function CGPACalculator() {
           {result && (
             <Card className="bg-gradient-number border-border/20 animate-scale-in">
               <CardContent className="pt-6 space-y-4">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Your CGPA</p>
-                  <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    {result.cgpa.toFixed(2)}
-                  </p>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Your CGPA</p>
+                    <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      {result.cgpa.toFixed(2)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Percentage</p>
+                    <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      {(result.cgpa * 9.5).toFixed(2)}%
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

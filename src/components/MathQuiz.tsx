@@ -107,22 +107,21 @@ export function MathQuiz({ onBackToCalculator }: MathQuizProps) {
       speak('Wrong!');
     }
 
-    // Move to next problem after delay
+    // Reset timer for next round and move to next problem
     setTimeout(() => {
       setUserInput('');
       setFeedback(null);
-      if (timeLeft > 0) {
-        setCurrentProblem(generateProblem());
-      }
+      setTimeLeft(30); // Reset timer to 30 seconds for next round
+      setCurrentProblem(generateProblem());
     }, 1000);
-  }, [currentProblem, userInput, gameState, timeLeft, speak, generateProblem]);
+  }, [currentProblem, userInput, gameState, speak, generateProblem]);
 
   // Handle Enter key for submitting answer
   const handleEnterClick = useCallback(() => {
     checkAnswer();
   }, [checkAnswer]);
 
-  // Timer effect
+  // Timer effect - counts down per round
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
@@ -130,8 +129,11 @@ export function MathQuiz({ onBackToCalculator }: MathQuizProps) {
       interval = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
-            setGameState('finished');
-            return 0;
+            // Time's up for this round, move to next problem
+            setUserInput('');
+            setFeedback(null);
+            setCurrentProblem(generateProblem());
+            return 30; // Reset to 30 seconds for next round
           }
           return prev - 1;
         });
@@ -139,7 +141,7 @@ export function MathQuiz({ onBackToCalculator }: MathQuizProps) {
     }
     
     return () => clearInterval(interval);
-  }, [gameState, timeLeft]);
+  }, [gameState, timeLeft, generateProblem]);
 
   // Game finished effect
   useEffect(() => {
@@ -189,7 +191,7 @@ export function MathQuiz({ onBackToCalculator }: MathQuizProps) {
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl mb-4">Ready to Play?</CardTitle>
                   <p className="text-muted-foreground mb-6">
-                    Solve as many math problems as you can in 30 seconds!
+                    Solve math problems! Each problem gives you 30 seconds.
                   </p>
                   <Button
                     onClick={startGame}
@@ -250,7 +252,7 @@ export function MathQuiz({ onBackToCalculator }: MathQuizProps) {
                   <CardTitle className="text-3xl mb-4">Game Over!</CardTitle>
                   <div className="text-6xl font-bold text-primary mb-4">{score}</div>
                   <p className="text-muted-foreground mb-6">
-                    You solved {score} problems in 30 seconds!
+                    You solved {score} problems correctly!
                   </p>
                   <Button
                     onClick={startGame}

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { translate } from '@/utils/translations';
 
 type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'es-ES' | 'fr-FR';
 
@@ -90,10 +91,12 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const speak = useCallback((text: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
-    console.log('Speaking text:', text, 'in language:', language);
+    // Translate text to selected language
+    const translatedText = translate(text, language);
+    console.log('Speaking text:', translatedText, 'in language:', language);
 
     const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(translatedText);
     utterance.lang = language;
     utterance.rate = 0.9;
 

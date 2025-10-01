@@ -116,22 +116,23 @@ export function CalculatorRacing({ onBackToCalculator }: CalculatorRacingProps) 
       speak('Wrong!');
     }
 
-    // Move to next problem after delay
+    // Reset timer for next round and move to next problem
     setTimeout(() => {
       setUserInput('');
       setFeedback(null);
-      if (timeLeft > 0 && distance < totalDistance - 1) {
+      if (distance < totalDistance - 1) {
+        setTimeLeft(30); // Reset timer to 30 seconds for next round
         setCurrentProblem(generateProblem());
       }
     }, 1000);
-  }, [currentProblem, userInput, gameState, timeLeft, distance, totalDistance, speak, generateProblem]);
+  }, [currentProblem, userInput, gameState, distance, totalDistance, speak, generateProblem]);
 
   // Handle Enter key for submitting answer
   const handleEnterClick = useCallback(() => {
     checkAnswer();
   }, [checkAnswer]);
 
-  // Timer effect
+  // Timer effect - counts down per round
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
@@ -139,8 +140,11 @@ export function CalculatorRacing({ onBackToCalculator }: CalculatorRacingProps) 
       interval = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
-            setGameState('finished');
-            return 0;
+            // Time's up for this round, move to next problem
+            setUserInput('');
+            setFeedback(null);
+            setCurrentProblem(generateProblem());
+            return 30; // Reset to 30 seconds for next round
           }
           return prev - 1;
         });
@@ -148,7 +152,7 @@ export function CalculatorRacing({ onBackToCalculator }: CalculatorRacingProps) 
     }
     
     return () => clearInterval(interval);
-  }, [gameState, timeLeft, distance, totalDistance]);
+  }, [gameState, timeLeft, distance, totalDistance, generateProblem]);
 
   // Game finished effect
   useEffect(() => {
@@ -206,7 +210,7 @@ export function CalculatorRacing({ onBackToCalculator }: CalculatorRacingProps) 
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl mb-4">Ready to Race?</CardTitle>
                   <p className="text-muted-foreground mb-6">
-                    Solve math problems to move your character forward. Reach the finish line or get as far as you can in 30 seconds!
+                    Solve math problems to move forward! Each problem gives you 30 seconds. Reach the finish line!
                   </p>
                   <Button
                     onClick={startGame}
@@ -303,7 +307,7 @@ export function CalculatorRacing({ onBackToCalculator }: CalculatorRacingProps) 
                   <p className="text-muted-foreground mb-6">
                     {distance >= totalDistance 
                       ? "Congratulations! You reached the finish line!" 
-                      : `You covered ${distance} steps in 30 seconds!`
+                      : `You covered ${distance} steps!`
                     }
                   </p>
                   <Button
