@@ -62,6 +62,14 @@ const translations: Translations = {
     'kn-IN': 'ಕ್ಯಾಲ್ಕುಲೇಟರ್ ತೆರವುಗೊಳಿಸಲಾಗಿದೆ',
     'es-ES': 'Calculadora borrada',
     'fr-FR': 'Calculatrice effacée'
+  },
+  'The answer is': {
+    'en-US': 'The answer is',
+    'hi-IN': 'उत्तर है',
+    'ta-IN': 'விடை',
+    'kn-IN': 'ಉತ್ತರ',
+    'es-ES': 'La respuesta es',
+    'fr-FR': 'La réponse est'
   }
 };
 

@@ -190,8 +190,48 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
     }
   };
 
+  const parseVoiceCalculation = (text: string): string | null => {
+    let expr = text.toLowerCase()
+      .replace(/plus/gi, '+')
+      .replace(/add/gi, '+')
+      .replace(/minus/gi, '-')
+      .replace(/subtract/gi, '-')
+      .replace(/times/gi, '*')
+      .replace(/multiply/gi, '*')
+      .replace(/divided by/gi, '/')
+      .replace(/divide/gi, '/')
+      .replace(/\s+/g, '');
+    
+    return evaluateAdvancedMath(expr);
+  };
+
   const generateBotResponse = (query: string): ChatMessage => {
     const lowerQuery = query.toLowerCase();
+    
+    // Try to parse as voice calculation first
+    const calcResult = parseVoiceCalculation(query);
+    if (calcResult !== null && /\d/.test(query)) {
+      const langCode = language.split('-')[0];
+      const translatePrefix = (lang: string) => {
+        const prefixes: { [key: string]: string } = {
+          'hi': 'उत्तर है',
+          'ta': 'விடை',
+          'kn': 'ಉತ್ತರ',
+          'es': 'La respuesta es',
+          'fr': 'La réponse est',
+          'en': 'The answer is'
+        };
+        return prefixes[lang] || 'The answer is';
+      };
+      
+      return {
+        id: crypto.randomUUID(),
+        type: 'bot',
+        content: `${translatePrefix(langCode)} ${calcResult}`,
+        timestamp: new Date(),
+        isCorrect: true
+      };
+    }
     
     // Handle challenge responses
     if (currentChallenge && /^[0-9.-]+$/.test(query.trim())) {

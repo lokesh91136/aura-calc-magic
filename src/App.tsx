@@ -42,8 +42,11 @@ const App = () => (
               <div className="flex min-h-screen w-full">
                 <AppSidebar />
                 <div className="flex-1">
-                  <header className="h-12 flex items-center sticky top-0 z-10">
-                    <SidebarTrigger className="ml-4" />
+                  <header className="h-16 flex items-center justify-center sticky top-0 z-10 backdrop-blur-sm">
+                    <SidebarTrigger className="absolute left-4" />
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                      AURACALC
+                    </h1>
                   </header>
                   <main className="flex-1 overflow-auto">
                     <Routes>
