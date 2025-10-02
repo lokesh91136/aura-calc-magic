@@ -135,6 +135,73 @@ export function translateNumber(num: number, language: Language): string {
   return numberToWords[language](num);
 }
 
+// Word to number mapping for speech recognition
+const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
+  'kn-IN': {
+    'ಸೊನ್ನೆ': '0', 'ಒಂದು': '1', 'ಎರಡು': '2', 'ಮೂರು': '3', 'ನಾಲ್ಕು': '4',
+    'ಐದು': '5', 'ಆರು': '6', 'ಏಳು': '7', 'ಎಂಟು': '8', 'ಒಂಬತ್ತು': '9',
+    'ಹತ್ತು': '10', 'ಹನ್ನೊಂದು': '11', 'ಹನ್ನೆರಡು': '12', 'ಹದಿಮೂರು': '13',
+    'ಹದಿನಾಲ್ಕು': '14', 'ಹದಿನೈದು': '15', 'ಹದಿನಾರು': '16', 'ಹದಿನೇಳು': '17',
+    'ಹದಿನೆಂಟು': '18', 'ಹತ್ತೊಂಬತ್ತು': '19', 'ಇಪ್ಪತ್ತು': '20',
+    'ಜೊತೆಗೆ': '+', 'ಮತ್ತು': '+', 'ಕಳೆಯಿರಿ': '-', 'ಗುಣಿಸಿ': '*', 'ಭಾಗಿಸಿ': '/'
+  },
+  'hi-IN': {
+    'शून्य': '0', 'एक': '1', 'दो': '2', 'तीन': '3', 'चार': '4',
+    'पाँच': '5', 'छह': '6', 'सात': '7', 'आठ': '8', 'नौ': '9',
+    'दस': '10', 'ग्यारह': '11', 'बारह': '12', 'तेरह': '13', 'चौदह': '14',
+    'पंद्रह': '15', 'सोलह': '16', 'सत्रह': '17', 'अठारह': '18', 'उन्नीस': '19',
+    'बीस': '20', 'तीस': '30', 'चालीस': '40', 'पचास': '50',
+    'साथ': '+', 'जोड़': '+', 'घटाएं': '-', 'गुणा': '*', 'भाग': '/'
+  },
+  'ta-IN': {
+    'பூஜ்யம்': '0', 'ஒன்று': '1', 'இரண்டு': '2', 'மூன்று': '3', 'நான்கு': '4',
+    'ஐந்து': '5', 'ஆறு': '6', 'ஏழு': '7', 'எட்டு': '8', 'ஒன்பது': '9',
+    'பத்து': '10', 'பதினொன்று': '11', 'பன்னிரண்டு': '12', 'பதின்மூன்று': '13',
+    'பதினான்கு': '14', 'பதினைந்து': '15', 'பதினாறு': '16', 'பதினேழு': '17',
+    'பதினெட்டு': '18', 'பத்தொன்பது': '19', 'இருபது': '20',
+    'கூட்டல்': '+', 'சேர்': '+', 'கழித்தல்': '-', 'பெருக்கல்': '*', 'வகுத்தல்': '/'
+  },
+  'en-US': {
+    'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+    'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
+    'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
+    'fourteen': '14', 'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
+    'eighteen': '18', 'nineteen': '19', 'twenty': '20', 'thirty': '30',
+    'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
+    'eighty': '80', 'ninety': '90', 'hundred': '100',
+    'plus': '+', 'add': '+', 'minus': '-', 'subtract': '-',
+    'times': '*', 'multiply': '*', 'divided': '/', 'divide': '/'
+  },
+  'es-ES': {},
+  'fr-FR': {}
+};
+
+export function parseSpokenMath(text: string, language: Language): string {
+  let processed = text.toLowerCase().trim();
+  
+  // Replace spoken words with numbers/operators for the selected language
+  const mapping = wordToNumber[language];
+  if (mapping) {
+    for (const [word, num] of Object.entries(mapping)) {
+      const regex = new RegExp(word, 'gi');
+      processed = processed.replace(regex, ` ${num} `);
+    }
+  }
+  
+  // Also handle English fallbacks
+  processed = processed
+    .replace(/plus/gi, '+')
+    .replace(/add/gi, '+')
+    .replace(/minus/gi, '-')
+    .replace(/subtract/gi, '-')
+    .replace(/times/gi, '*')
+    .replace(/multiply/gi, '*')
+    .replace(/divided\s*by/gi, '/')
+    .replace(/divide/gi, '/');
+  
+  return processed.replace(/\s+/g, ' ').trim();
+}
+
 export function translate(text: string, language: Language): string {
   // Try exact match first
   if (translations[text] && translations[text][language]) {

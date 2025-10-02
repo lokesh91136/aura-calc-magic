@@ -10,7 +10,8 @@ import {
   Send, Bot, User, MessageCircle, Volume2, VolumeX, Calculator, ArrowLeft, 
   Lightbulb, Languages, Download, Trophy, Brain, Target, BookOpen 
 } from 'lucide-react';
-import { useVoice } from '@/contexts/VoiceContext';
+import { useVoice, type Language } from '@/contexts/VoiceContext';
+import { translate, parseSpokenMath } from '@/utils/translations';
 import { Link } from 'react-router-dom';
 
 interface ChatMessage {
@@ -331,18 +332,9 @@ Verification: ${a}(${x}) ${operator} ${b} = ${a * x + (operator === '+' ? b : -b
   };
 
   const parseVoiceCalculation = (text: string): string | null => {
-    let expr = text.toLowerCase()
-      .replace(/plus/gi, '+')
-      .replace(/add/gi, '+')
-      .replace(/minus/gi, '-')
-      .replace(/subtract/gi, '-')
-      .replace(/times/gi, '*')
-      .replace(/multiply/gi, '*')
-      .replace(/divided by/gi, '/')
-      .replace(/divide/gi, '/')
-      .replace(/\s+/g, '');
-    
-    return evaluateExpression(expr);
+    // Parse spoken math using the selected language
+    const processed = parseSpokenMath(text, language as Language);
+    return evaluateExpression(processed);
   };
 
   const generateBotResponse = (query: string): ChatMessage => {
@@ -351,7 +343,7 @@ Verification: ${a}(${x}) ${operator} ${b} = ${a * x + (operator === '+' ? b : -b
     // Try to parse as voice calculation first
     const calcResult = parseVoiceCalculation(query);
     if (calcResult !== null && /\d/.test(query)) {
-      const response = `The answer is ${calcResult}`;
+      const response = translate(`The answer is ${calcResult}`, language as Language);
       
       return {
         id: crypto.randomUUID(),
