@@ -103,14 +103,45 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     const assignBestVoice = () => {
       const voices = synth.getVoices();
       console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
-      const matchingVoice = voices.find(voice =>
+      
+      // Try exact language match first
+      let matchingVoice = voices.find(voice =>
         voice.lang === language || voice.lang.startsWith(language.split('-')[0])
       );
+      
+      // Kannada-specific fallback strategy
+      if (!matchingVoice && language === 'kn-IN') {
+        console.log('Primary Kannada voice not found, trying fallbacks...');
+        
+        // Try variations of Kannada
+        matchingVoice = voices.find(voice => 
+          voice.lang.toLowerCase().includes('kn') || 
+          voice.name.toLowerCase().includes('kannada')
+        );
+        
+        // If still not found, use any Indian language voice (Hindi, Tamil) as fallback
+        if (!matchingVoice) {
+          matchingVoice = voices.find(voice =>
+            voice.lang.startsWith('hi-') || voice.lang.startsWith('ta-')
+          );
+          console.log('Using Indian language fallback voice for Kannada');
+        }
+      }
+      
+      // Similar fallback for other Indian languages
+      if (!matchingVoice && (language === 'hi-IN' || language === 'ta-IN')) {
+        const langCode = language.split('-')[0];
+        matchingVoice = voices.find(voice => 
+          voice.lang.toLowerCase().includes(langCode)
+        );
+      }
+      
       if (matchingVoice) {
         console.log('Using voice:', matchingVoice.name, 'for language:', matchingVoice.lang);
         utterance.voice = matchingVoice;
       } else {
-        console.log('No matching voice found for language:', language, 'using default');
+        console.log('No matching voice found for language:', language, 'using default but will still speak');
+        // Even without perfect voice, we still speak the translated text
       }
     };
 
