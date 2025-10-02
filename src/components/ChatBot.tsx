@@ -211,23 +211,12 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
     // Try to parse as voice calculation first
     const calcResult = parseVoiceCalculation(query);
     if (calcResult !== null && /\d/.test(query)) {
-      const langCode = language.split('-')[0];
-      const translatePrefix = (lang: string) => {
-        const prefixes: { [key: string]: string } = {
-          'hi': 'उत्तर है',
-          'ta': 'விடை',
-          'kn': 'ಉತ್ತರ',
-          'es': 'La respuesta es',
-          'fr': 'La réponse est',
-          'en': 'The answer is'
-        };
-        return prefixes[lang] || 'The answer is';
-      };
+      const response = `The answer is ${calcResult}`;
       
       return {
         id: crypto.randomUUID(),
         type: 'bot',
-        content: `${translatePrefix(langCode)} ${calcResult}`,
+        content: response,
         timestamp: new Date(),
         isCorrect: true
       };
