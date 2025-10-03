@@ -192,6 +192,11 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
   };
 
   const parseVoiceCalculation = (text: string): string | null => {
+    // Handle error signals from voice recognition
+    if (text === '__EMPTY_TRANSCRIPT__' || text === '__RECOGNITION_ERROR__') {
+      return null;
+    }
+    
     // Parse spoken math using the selected language
     const processed = parseSpokenMath(text, language as Language);
     return evaluateAdvancedMath(processed);
@@ -199,6 +204,18 @@ export function ChatBot({ isOpen, onOpenChange }: ChatBotProps) {
 
   const generateBotResponse = (query: string): ChatMessage => {
     const lowerQuery = query.toLowerCase();
+    
+    // Handle voice recognition errors with user-friendly messages
+    if (query === '__EMPTY_TRANSCRIPT__' || query === '__RECOGNITION_ERROR__') {
+      const errorMsg = translate('Could not understand. Please try again', language as Language);
+      
+      return {
+        id: crypto.randomUUID(),
+        type: 'bot',
+        content: errorMsg,
+        timestamp: new Date()
+      };
+    }
     
     // Try to parse as voice calculation first
     const calcResult = parseVoiceCalculation(query);

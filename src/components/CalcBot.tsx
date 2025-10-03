@@ -332,6 +332,11 @@ Verification: ${a}(${x}) ${operator} ${b} = ${a * x + (operator === '+' ? b : -b
   };
 
   const parseVoiceCalculation = (text: string): string | null => {
+    // Handle error signals from voice recognition
+    if (text === '__EMPTY_TRANSCRIPT__' || text === '__RECOGNITION_ERROR__') {
+      return null;
+    }
+    
     // Parse spoken math using the selected language
     const processed = parseSpokenMath(text, language as Language);
     return evaluateExpression(processed);
@@ -339,6 +344,19 @@ Verification: ${a}(${x}) ${operator} ${b} = ${a * x + (operator === '+' ? b : -b
 
   const generateBotResponse = (query: string): ChatMessage => {
     const lowerQuery = query.toLowerCase().trim();
+    
+    // Handle voice recognition errors with user-friendly messages
+    if (query === '__EMPTY_TRANSCRIPT__' || query === '__RECOGNITION_ERROR__') {
+      const errorMsg = translate('Could not understand. Please try again', language as Language);
+      
+      return {
+        id: crypto.randomUUID(),
+        type: 'system',
+        content: errorMsg,
+        timestamp: new Date(),
+        mode: 'normal'
+      };
+    }
     
     // Try to parse as voice calculation first
     const calcResult = parseVoiceCalculation(query);

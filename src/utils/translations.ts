@@ -70,6 +70,22 @@ const translations: Translations = {
     'kn-IN': 'ಉತ್ತರ',
     'es-ES': 'La respuesta es',
     'fr-FR': 'La réponse est'
+  },
+  'Please try again': {
+    'en-US': 'Please try again',
+    'hi-IN': 'कृपया पुनः प्रयास करें',
+    'ta-IN': 'தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
+    'kn-IN': 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    'es-ES': 'Por favor, inténtalo de nuevo',
+    'fr-FR': 'Veuillez réessayer'
+  },
+  'Could not understand. Please try again': {
+    'en-US': 'Could not understand. Please try again',
+    'hi-IN': 'समझ नहीं आया। कृपया पुनः प्रयास करें',
+    'ta-IN': 'புரியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
+    'kn-IN': 'ಅರ್ಥವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    'es-ES': 'No se pudo entender. Por favor, inténtalo de nuevo',
+    'fr-FR': 'Je n\'ai pas compris. Veuillez réessayer'
   }
 };
 
@@ -143,7 +159,8 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
     'ಹತ್ತು': '10', 'ಹನ್ನೊಂದು': '11', 'ಹನ್ನೆರಡು': '12', 'ಹದಿಮೂರು': '13',
     'ಹದಿನಾಲ್ಕು': '14', 'ಹದಿನೈದು': '15', 'ಹದಿನಾರು': '16', 'ಹದಿನೇಳು': '17',
     'ಹದಿನೆಂಟು': '18', 'ಹತ್ತೊಂಬತ್ತು': '19', 'ಇಪ್ಪತ್ತು': '20',
-    'ಜೊತೆಗೆ': '+', 'ಮತ್ತು': '+', 'ಕಳೆಯಿರಿ': '-', 'ಗುಣಿಸಿ': '*', 'ಭಾಗಿಸಿ': '/'
+    'ಜೊತೆಗೆ': '+', 'ಮತ್ತು': '+', 'ಹೆಚ್ಚು': '+', 'ಕಳೆಯಿರಿ': '-', 'ಕಡಿಮೆ': '-',
+    'ಗುಣಿಸಿ': '*', 'ಭಾಗಿಸಿ': '/'
   },
   'hi-IN': {
     'शून्य': '0', 'एक': '1', 'दो': '2', 'तीन': '3', 'चार': '4',
@@ -170,7 +187,7 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
     'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
     'eighty': '80', 'ninety': '90', 'hundred': '100',
     'plus': '+', 'add': '+', 'minus': '-', 'subtract': '-',
-    'times': '*', 'multiply': '*', 'divided': '/', 'divide': '/'
+    'times': '*', 'multiply': '*', 'into': '*', 'divided': '/', 'divide': '/'
   },
   'es-ES': {},
   'fr-FR': {}
@@ -179,25 +196,31 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
 export function parseSpokenMath(text: string, language: Language): string {
   let processed = text.toLowerCase().trim();
   
+  // Handle empty or error signals
+  if (!processed || processed === '__empty_transcript__' || processed === '__recognition_error__') {
+    return '';
+  }
+  
   // Replace spoken words with numbers/operators for the selected language
   const mapping = wordToNumber[language];
   if (mapping) {
     for (const [word, num] of Object.entries(mapping)) {
-      const regex = new RegExp(word, 'gi');
+      const regex = new RegExp(`\\b${word}\\b`, 'gi');
       processed = processed.replace(regex, ` ${num} `);
     }
   }
   
-  // Also handle English fallbacks
+  // Handle English operator fallbacks (including "into" and "divided by")
   processed = processed
-    .replace(/plus/gi, '+')
-    .replace(/add/gi, '+')
-    .replace(/minus/gi, '-')
-    .replace(/subtract/gi, '-')
-    .replace(/times/gi, '*')
-    .replace(/multiply/gi, '*')
-    .replace(/divided\s*by/gi, '/')
-    .replace(/divide/gi, '/');
+    .replace(/\bplus\b/gi, '+')
+    .replace(/\badd\b/gi, '+')
+    .replace(/\bminus\b/gi, '-')
+    .replace(/\bsubtract\b/gi, '-')
+    .replace(/\btimes\b/gi, '*')
+    .replace(/\bmultiply\b/gi, '*')
+    .replace(/\binto\b/gi, '*')
+    .replace(/\bdivided\s*by\b/gi, '/')
+    .replace(/\bdivide\b/gi, '/');
   
   return processed.replace(/\s+/g, ' ').trim();
 }

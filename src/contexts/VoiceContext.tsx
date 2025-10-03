@@ -63,13 +63,25 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     recognition.onerror = (event: any) => {
       console.log('Speech recognition error:', event.error);
       setIsListening(false);
+      
+      // Pass error signal to handler
+      if (event.error === 'no-speech' || event.error === 'audio-capture') {
+        onResult('__RECOGNITION_ERROR__');
+      }
     };
     
     recognition.onresult = (event: any) => {
       console.log('Speech recognition result event:', event);
-      const transcript = event.results[0]?.transcript || '';
+      const transcript = event.results[0]?.transcript?.trim() || '';
       console.log('Transcript received:', transcript);
-      onResult(transcript);
+      
+      // Only call onResult if transcript is not empty
+      if (transcript) {
+        onResult(transcript);
+      } else {
+        console.log('Empty transcript, requesting retry');
+        onResult('__EMPTY_TRANSCRIPT__');
+      }
     };
     
     try {
