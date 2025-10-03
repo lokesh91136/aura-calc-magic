@@ -30,53 +30,53 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <VoiceProvider>
-          <HistoryProvider>
-            <StudyProvider>
-          <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <SidebarProvider>
-              <div className="flex min-h-screen w-full">
-                <AppSidebar />
-                <div className="flex-1">
-                  <header className="h-16 flex items-center justify-center sticky top-0 z-10 backdrop-blur-sm">
-                    <SidebarTrigger className="absolute left-4" />
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                      AURACALC
-                    </h1>
-                  </header>
-                  <main className="flex-1 overflow-auto">
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/scientific" element={<ScientificCalculatorPage />} />
-                      <Route path="/sip" element={<SIPPage />} />
-                      <Route path="/emi" element={<EMIPage />} />
-                      <Route path="/percentage" element={<PercentagePage />} />
-                      <Route path="/tally" element={<TallyPage />} />
-                      <Route path="/math-quiz" element={<MathQuizPage />} />
-                      <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
-                      <Route path="/study" element={<StudyModePage />} />
-                      <Route path="/marks-percentage" element={<MarksPercentagePage />} />
-                      <Route path="/attendance" element={<AttendancePage />} />
-                      <Route path="/gpa" element={<GPAPage />} />
-                      <Route path="/cgpa" element={<CGPAPage />} />
-                      <Route path="/grade" element={<GradePage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
-                </div>
-              </div>
-            </SidebarProvider>
-            <HistoryPanel />
-          </BrowserRouter>
-          </TooltipProvider>
-            </StudyProvider>
-          </HistoryProvider>
-        </VoiceProvider>
-      </ThemeProvider>
+    <ThemeProvider>
+      <VoiceProvider>
+        <HistoryProvider>
+          <StudyProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <SidebarProvider>
+                  <div className="flex min-h-screen w-full">
+                    <AppSidebar />
+                    <div className="flex-1">
+                      <header className="h-16 flex items-center justify-center sticky top-0 z-10 backdrop-blur-sm">
+                        <SidebarTrigger className="absolute left-4" />
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                          AURACALC
+                        </h1>
+                      </header>
+                      <main className="flex-1 overflow-auto">
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/scientific" element={<ScientificCalculatorPage />} />
+                          <Route path="/sip" element={<SIPPage />} />
+                          <Route path="/emi" element={<EMIPage />} />
+                          <Route path="/percentage" element={<PercentagePage />} />
+                          <Route path="/tally" element={<TallyPage />} />
+                          <Route path="/math-quiz" element={<MathQuizPage />} />
+                          <Route path="/calculator-racing" element={<CalculatorRacingPage />} />
+                          <Route path="/study" element={<StudyModePage />} />
+                          <Route path="/marks-percentage" element={<MarksPercentagePage />} />
+                          <Route path="/attendance" element={<AttendancePage />} />
+                          <Route path="/gpa" element={<GPAPage />} />
+                          <Route path="/cgpa" element={<CGPAPage />} />
+                          <Route path="/grade" element={<GradePage />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </div>
+                  </div>
+                </SidebarProvider>
+                <HistoryPanel />
+              </BrowserRouter>
+            </TooltipProvider>
+          </StudyProvider>
+        </HistoryProvider>
+      </VoiceProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
