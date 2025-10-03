@@ -1,4 +1,4 @@
-type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'es-ES' | 'fr-FR';
+type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'te-IN' | 'es-ES' | 'fr-FR';
 
 interface Translations {
   [key: string]: {
@@ -12,6 +12,7 @@ const translations: Translations = {
     'hi-IN': 'सही!',
     'ta-IN': 'சரியானது!',
     'kn-IN': 'ಸರಿ!',
+    'te-IN': 'సరైనది!',
     'es-ES': '¡Correcto!',
     'fr-FR': 'Correct!'
   },
@@ -20,6 +21,7 @@ const translations: Translations = {
     'hi-IN': 'गलत!',
     'ta-IN': 'தவறு!',
     'kn-IN': 'ತಪ್ಪು!',
+    'te-IN': 'తప్పు!',
     'es-ES': '¡Incorrecto!',
     'fr-FR': 'Faux!'
   },
@@ -28,6 +30,7 @@ const translations: Translations = {
     'hi-IN': 'खेल समाप्त! आपका स्कोर है',
     'ta-IN': 'விளையாட்டு முடிந்தது! உங்கள் மதிப்பெண்',
     'kn-IN': 'ಆಟ ಮುಗಿದಿದೆ! ನಿಮ್ಮ ಅಂಕ',
+    'te-IN': 'ఆట ముగిసింది! మీ స్కోరు',
     'es-ES': '¡Juego terminado! Tu puntuación es',
     'fr-FR': 'Jeu terminé! Votre score est'
   },
@@ -36,6 +39,7 @@ const translations: Translations = {
     'hi-IN': 'दौड़ समाप्त! आप दूरी के साथ अंतिम पंक्ति तक पहुंच गए',
     'ta-IN': 'ஓட்டம் முடிந்தது! நீங்கள் தூரத்துடன் இறுதி கோட்டை எட்டினீர்கள்',
     'kn-IN': 'ಓಟ ಮುಗಿದಿದೆ! ನೀವು ದೂರದೊಂದಿಗೆ ಅಂತಿಮ ರೇಖೆಯನ್ನು ತಲುಪಿದ್ದೀರಿ',
+    'te-IN': 'రేసు ముగిసింది! మీరు దూరంతో ముగింపు రేఖకు చేరుకున్నారు',
     'es-ES': '¡Carrera terminada! Alcanzaste la línea de meta con distancia',
     'fr-FR': 'Course terminée! Vous avez atteint la ligne d\'arrivée avec une distance de'
   },
@@ -44,6 +48,7 @@ const translations: Translations = {
     'hi-IN': 'दौड़ समाप्त! आपकी दूरी है',
     'ta-IN': 'ஓட்டம் முடிந்தது! உங்கள் தூரம்',
     'kn-IN': 'ಓಟ ಮುಗಿದಿದೆ! ನಿಮ್ಮ ದೂರ',
+    'te-IN': 'రేసు ముగిసింది! మీ దూరం',
     'es-ES': '¡Carrera terminada! Tu distancia es',
     'fr-FR': 'Course terminée! Votre distance est'
   },
@@ -52,6 +57,7 @@ const translations: Translations = {
     'hi-IN': 'परिणाम है',
     'ta-IN': 'முடிவு',
     'kn-IN': 'ಫಲಿತಾಂಶ',
+    'te-IN': 'ఫలితం',
     'es-ES': 'El resultado es',
     'fr-FR': 'Le résultat est'
   },
@@ -60,6 +66,7 @@ const translations: Translations = {
     'hi-IN': 'कैलकुलेटर साफ़ किया गया',
     'ta-IN': 'கால்குலேட்டர் அழிக்கப்பட்டது',
     'kn-IN': 'ಕ್ಯಾಲ್ಕುಲೇಟರ್ ತೆರವುಗೊಳಿಸಲಾಗಿದೆ',
+    'te-IN': 'కాలిక్యులేటర్ క్లియర్ చేయబడింది',
     'es-ES': 'Calculadora borrada',
     'fr-FR': 'Calculatrice effacée'
   },
@@ -68,6 +75,7 @@ const translations: Translations = {
     'hi-IN': 'उत्तर है',
     'ta-IN': 'விடை',
     'kn-IN': 'ಉತ್ತರ',
+    'te-IN': 'సమాధానం',
     'es-ES': 'La respuesta es',
     'fr-FR': 'La réponse est'
   },
@@ -76,6 +84,7 @@ const translations: Translations = {
     'hi-IN': 'कृपया पुनः प्रयास करें',
     'ta-IN': 'தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
     'kn-IN': 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    'te-IN': 'దయచేసి మళ్ళీ ప్రయత్నించండి',
     'es-ES': 'Por favor, inténtalo de nuevo',
     'fr-FR': 'Veuillez réessayer'
   },
@@ -84,6 +93,7 @@ const translations: Translations = {
     'hi-IN': 'समझ नहीं आया। कृपया पुनः प्रयास करें',
     'ta-IN': 'புரியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
     'kn-IN': 'ಅರ್ಥವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    'te-IN': 'అర్థం కాలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి',
     'es-ES': 'No se pudo entender. Por favor, inténtalo de nuevo',
     'fr-FR': 'Je n\'ai pas compris. Veuillez réessayer'
   },
@@ -92,6 +102,7 @@ const translations: Translations = {
     'hi-IN': 'कन्नड़ आवाज़ उपलब्ध नहीं',
     'ta-IN': 'கன்னட குரல் கிடைக்கவில்லை',
     'kn-IN': 'ಕನ್ನಡ ಧ್ವನಿ ಲಭ್ಯವಿಲ್ಲ',
+    'te-IN': 'కన్నడ వాయిస్ అందుబాటులో లేదు',
     'es-ES': 'Voz de Kannada no disponible',
     'fr-FR': 'Voix Kannada non disponible'
   }
@@ -150,6 +161,23 @@ const numberToWords: { [lang in Language]: (num: number) => string } = {
     }
     return num.toString();
   },
+  'te-IN': (num: number) => {
+    const teluguNumbers: { [key: number]: string } = {
+      0: 'సున్నా', 1: 'ఒకటి', 2: 'రెండు', 3: 'మూడు', 4: 'నాలుగు',
+      5: 'ఐదు', 6: 'ఆరు', 7: 'ఏడు', 8: 'ఎనిమిది', 9: 'తొమ్మిది',
+      10: 'పది', 20: 'ఇరవై', 30: 'ముప్పై', 40: 'నలభై',
+      50: 'యాభై', 60: 'అరవై', 70: 'డెబ్బై', 80: 'ఎనభై',
+      90: 'తొంభై', 100: 'వంద', 1000: 'వేయి'
+    };
+    
+    if (teluguNumbers[num]) return teluguNumbers[num];
+    if (num < 100) {
+      const tens = Math.floor(num / 10) * 10;
+      const ones = num % 10;
+      return `${teluguNumbers[tens]} ${teluguNumbers[ones]}`;
+    }
+    return num.toString();
+  },
   'es-ES': (num: number) => num.toString(),
   'fr-FR': (num: number) => num.toString(),
   'en-US': (num: number) => num.toString()
@@ -196,6 +224,14 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
     'eighty': '80', 'ninety': '90', 'hundred': '100',
     'plus': '+', 'add': '+', 'minus': '-', 'subtract': '-',
     'times': '*', 'multiply': '*', 'into': '*', 'divided': '/', 'divide': '/'
+  },
+  'te-IN': {
+    'సున్నా': '0', 'ఒకటి': '1', 'రెండు': '2', 'మూడు': '3', 'నాలుగు': '4',
+    'ఐదు': '5', 'ఆరు': '6', 'ఏడు': '7', 'ఎనిమిది': '8', 'తొమ్మిది': '9',
+    'పది': '10', 'పదకొండు': '11', 'పన్నెండు': '12', 'పదమూడు': '13',
+    'పద్నాలుగు': '14', 'పదిహేను': '15', 'పదహారు': '16', 'పదిహేడు': '17',
+    'పద్దెనిమిది': '18', 'పందొమ్మిది': '19', 'ఇరవై': '20',
+    'కూడిక': '+', 'చేర్చు': '+', 'తీసివేయు': '-', 'గుణించు': '*', 'భాగించు': '/'
   },
   'es-ES': {},
   'fr-FR': {}

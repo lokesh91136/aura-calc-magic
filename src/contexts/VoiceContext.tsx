@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { translate } from '@/utils/translations';
 
-type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'es-ES' | 'fr-FR';
+type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'te-IN' | 'es-ES' | 'fr-FR';
 
 interface VoiceContextType {
   isListening: boolean;
@@ -20,6 +20,7 @@ const languageConfig = {
   'hi-IN': { name: 'हिंदी', voice: 'hi-IN' },
   'ta-IN': { name: 'தமிழ்', voice: 'ta-IN' },
   'kn-IN': { name: 'ಕನ್ನಡ', voice: 'kn-IN' },
+  'te-IN': { name: 'తెలుగు', voice: 'te-IN' },
   'es-ES': { name: 'Español', voice: 'es-ES' },
   'fr-FR': { name: 'Français', voice: 'fr-FR' },
 };
@@ -141,7 +142,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         );
         
         // For other Indian languages, try language code match
-        if (!matchingVoice && (language === 'hi-IN' || language === 'ta-IN')) {
+        if (!matchingVoice && (language === 'hi-IN' || language === 'ta-IN' || language === 'te-IN')) {
           const langCode = language.split('-')[0];
           matchingVoice = voices.find(voice => 
             voice.lang.toLowerCase().includes(langCode)
@@ -203,7 +204,7 @@ export function useVoice() {
     // Graceful fallback to prevent runtime crash if provider is missing
     return {
       isListening: false,
-      language: 'en-US',
+      language: 'en-US' as Language,
       setLanguage: () => {},
       startListening: () => {},
       stopListening: () => {},
