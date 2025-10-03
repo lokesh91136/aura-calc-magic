@@ -199,7 +199,17 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
 export function useVoice() {
   const context = useContext(VoiceContext);
   if (!context) {
-    throw new Error('useVoice must be used within VoiceProvider');
+    console.warn('useVoice must be used within VoiceProvider - falling back to no-op context');
+    // Graceful fallback to prevent runtime crash if provider is missing
+    return {
+      isListening: false,
+      language: 'en-US',
+      setLanguage: () => {},
+      startListening: () => {},
+      stopListening: () => {},
+      speak: () => {},
+      isSupported: false,
+    } as VoiceContextType;
   }
   return context;
 }
