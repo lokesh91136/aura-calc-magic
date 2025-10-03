@@ -86,6 +86,14 @@ const translations: Translations = {
     'kn-IN': 'ಅರ್ಥವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
     'es-ES': 'No se pudo entender. Por favor, inténtalo de nuevo',
     'fr-FR': 'Je n\'ai pas compris. Veuillez réessayer'
+  },
+  'Kannada voice not available': {
+    'en-US': 'Kannada voice not available',
+    'hi-IN': 'कन्नड़ आवाज़ उपलब्ध नहीं',
+    'ta-IN': 'கன்னட குரல் கிடைக்கவில்லை',
+    'kn-IN': 'ಕನ್ನಡ ಧ್ವನಿ ಲಭ್ಯವಿಲ್ಲ',
+    'es-ES': 'Voz de Kannada no disponible',
+    'fr-FR': 'Voix Kannada non disponible'
   }
 };
 

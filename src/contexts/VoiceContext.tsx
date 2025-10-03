@@ -116,44 +116,44 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       const voices = synth.getVoices();
       console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
       
-      // Try exact language match first
-      let matchingVoice = voices.find(voice =>
-        voice.lang === language || voice.lang.startsWith(language.split('-')[0])
-      );
-      
-      // Kannada-specific fallback strategy
-      if (!matchingVoice && language === 'kn-IN') {
-        console.log('Primary Kannada voice not found, trying fallbacks...');
-        
-        // Try variations of Kannada
-        matchingVoice = voices.find(voice => 
+      // For Kannada, ONLY use kn-IN voices - no fallbacks
+      if (language === 'kn-IN') {
+        const kannadaVoice = voices.find(voice =>
+          voice.lang === 'kn-IN' || 
           voice.lang.toLowerCase().includes('kn') || 
           voice.name.toLowerCase().includes('kannada')
         );
         
-        // If still not found, use any Indian language voice (Hindi, Tamil) as fallback
-        if (!matchingVoice) {
-          matchingVoice = voices.find(voice =>
-            voice.lang.startsWith('hi-') || voice.lang.startsWith('ta-')
-          );
-          console.log('Using Indian language fallback voice for Kannada');
+        if (kannadaVoice) {
+          console.log('Using Kannada voice:', kannadaVoice.name);
+          utterance.voice = kannadaVoice;
+        } else {
+          console.error('Kannada voice not available');
+          // Show error message instead of speaking in wrong language
+          const errorMsg = translate('Kannada voice not available', language);
+          console.log(errorMsg);
+          return; // Don't speak if no Kannada voice
         }
-      }
-      
-      // Similar fallback for other Indian languages
-      if (!matchingVoice && (language === 'hi-IN' || language === 'ta-IN')) {
-        const langCode = language.split('-')[0];
-        matchingVoice = voices.find(voice => 
-          voice.lang.toLowerCase().includes(langCode)
-        );
-      }
-      
-      if (matchingVoice) {
-        console.log('Using voice:', matchingVoice.name, 'for language:', matchingVoice.lang);
-        utterance.voice = matchingVoice;
       } else {
-        console.log('No matching voice found for language:', language, 'using default but will still speak');
-        // Even without perfect voice, we still speak the translated text
+        // For other languages, try exact match
+        let matchingVoice = voices.find(voice =>
+          voice.lang === language || voice.lang.startsWith(language.split('-')[0])
+        );
+        
+        // For other Indian languages, try language code match
+        if (!matchingVoice && (language === 'hi-IN' || language === 'ta-IN')) {
+          const langCode = language.split('-')[0];
+          matchingVoice = voices.find(voice => 
+            voice.lang.toLowerCase().includes(langCode)
+          );
+        }
+        
+        if (matchingVoice) {
+          console.log('Using voice:', matchingVoice.name, 'for language:', matchingVoice.lang);
+          utterance.voice = matchingVoice;
+        } else {
+          console.log('No matching voice found for language:', language, 'using default');
+        }
       }
     };
 
