@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { translate } from '@/utils/translations';
 
-type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'te-IN' | 'es-ES' | 'fr-FR';
+type Language = 'en-IN' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'te-IN' | 'es-ES' | 'fr-FR';
 
 interface VoiceContextType {
   isListening: boolean;
@@ -16,7 +16,7 @@ interface VoiceContextType {
 const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
 
 const languageConfig = {
-  'en-US': { name: 'English', voice: 'en-US' },
+  'en-IN': { name: 'English', voice: 'en-IN' },
   'hi-IN': { name: 'हिंदी', voice: 'hi-IN' },
   'ta-IN': { name: 'தமிழ்', voice: 'ta-IN' },
   'kn-IN': { name: 'ಕನ್ನಡ', voice: 'kn-IN' },
@@ -27,7 +27,7 @@ const languageConfig = {
 
 export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const [isListening, setIsListening] = useState(false);
-  const [language, setLanguage] = useState<Language>('en-US');
+  const [language, setLanguage] = useState<Language>('en-IN');
   const [recognition, setRecognition] = useState<any>(null);
 
   const isSupported = typeof window !== 'undefined' && 
@@ -136,16 +136,25 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
           return; // Don't speak if no Kannada voice
         }
       } else {
-        // For other languages, try exact match
+        // Try exact match first
         let matchingVoice = voices.find(voice =>
-          voice.lang === language || voice.lang.startsWith(language.split('-')[0])
+          voice.lang === language
         );
         
-        // For other Indian languages, try language code match
-        if (!matchingVoice && (language === 'hi-IN' || language === 'ta-IN' || language === 'te-IN')) {
+        // For Indian languages (including English), try broader match
+        if (!matchingVoice && (language === 'en-IN' || language === 'hi-IN' || language === 'ta-IN' || language === 'te-IN')) {
           const langCode = language.split('-')[0];
           matchingVoice = voices.find(voice => 
-            voice.lang.toLowerCase().includes(langCode)
+            voice.lang.toLowerCase().includes(langCode) ||
+            voice.lang.startsWith(langCode)
+          );
+        }
+        
+        // For other languages, try language code match
+        if (!matchingVoice) {
+          const langCode = language.split('-')[0];
+          matchingVoice = voices.find(voice =>
+            voice.lang.startsWith(langCode)
           );
         }
         
@@ -204,7 +213,7 @@ export function useVoice() {
     // Graceful fallback to prevent runtime crash if provider is missing
     return {
       isListening: false,
-      language: 'en-US' as Language,
+      language: 'en-IN' as Language,
       setLanguage: () => {},
       startListening: () => {},
       stopListening: () => {},

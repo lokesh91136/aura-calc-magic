@@ -1,4 +1,4 @@
-type Language = 'en-US' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'te-IN' | 'es-ES' | 'fr-FR';
+type Language = 'en-IN' | 'hi-IN' | 'ta-IN' | 'kn-IN' | 'te-IN' | 'es-ES' | 'fr-FR';
 
 interface Translations {
   [key: string]: {
@@ -8,7 +8,7 @@ interface Translations {
 
 const translations: Translations = {
   'Correct!': {
-    'en-US': 'Correct!',
+    'en-IN': 'Correct!',
     'hi-IN': 'सही!',
     'ta-IN': 'சரியானது!',
     'kn-IN': 'ಸರಿ!',
@@ -17,7 +17,7 @@ const translations: Translations = {
     'fr-FR': 'Correct!'
   },
   'Wrong!': {
-    'en-US': 'Wrong!',
+    'en-IN': 'Wrong!',
     'hi-IN': 'गलत!',
     'ta-IN': 'தவறு!',
     'kn-IN': 'ತಪ್ಪು!',
@@ -26,7 +26,7 @@ const translations: Translations = {
     'fr-FR': 'Faux!'
   },
   'Game over! Your score is': {
-    'en-US': 'Game over! Your score is',
+    'en-IN': 'Game over! Your score is',
     'hi-IN': 'खेल समाप्त! आपका स्कोर है',
     'ta-IN': 'விளையாட்டு முடிந்தது! உங்கள் மதிப்பெண்',
     'kn-IN': 'ಆಟ ಮುಗಿದಿದೆ! ನಿಮ್ಮ ಅಂಕ',
@@ -35,7 +35,7 @@ const translations: Translations = {
     'fr-FR': 'Jeu terminé! Votre score est'
   },
   'Race finished! You reached the finish line with distance': {
-    'en-US': 'Race finished! You reached the finish line with distance',
+    'en-IN': 'Race finished! You reached the finish line with distance',
     'hi-IN': 'दौड़ समाप्त! आप दूरी के साथ अंतिम पंक्ति तक पहुंच गए',
     'ta-IN': 'ஓட்டம் முடிந்தது! நீங்கள் தூரத்துடன் இறுதி கோட்டை எட்டினீர்கள்',
     'kn-IN': 'ಓಟ ಮುಗಿದಿದೆ! ನೀವು ದೂರದೊಂದಿಗೆ ಅಂತಿಮ ರೇಖೆಯನ್ನು ತಲುಪಿದ್ದೀರಿ',
@@ -44,7 +44,7 @@ const translations: Translations = {
     'fr-FR': 'Course terminée! Vous avez atteint la ligne d\'arrivée avec une distance de'
   },
   'Race finished! Your distance is': {
-    'en-US': 'Race finished! Your distance is',
+    'en-IN': 'Race finished! Your distance is',
     'hi-IN': 'दौड़ समाप्त! आपकी दूरी है',
     'ta-IN': 'ஓட்டம் முடிந்தது! உங்கள் தூரம்',
     'kn-IN': 'ಓಟ ಮುಗಿದಿದೆ! ನಿಮ್ಮ ದೂರ',
@@ -53,7 +53,7 @@ const translations: Translations = {
     'fr-FR': 'Course terminée! Votre distance est'
   },
   'Result is': {
-    'en-US': 'Result is',
+    'en-IN': 'Result is',
     'hi-IN': 'परिणाम है',
     'ta-IN': 'முடிவு',
     'kn-IN': 'ಫಲಿತಾಂಶ',
@@ -62,7 +62,7 @@ const translations: Translations = {
     'fr-FR': 'Le résultat est'
   },
   'Calculator cleared': {
-    'en-US': 'Calculator cleared',
+    'en-IN': 'Calculator cleared',
     'hi-IN': 'कैलकुलेटर साफ़ किया गया',
     'ta-IN': 'கால்குலேட்டர் அழிக்கப்பட்டது',
     'kn-IN': 'ಕ್ಯಾಲ್ಕುಲೇಟರ್ ತೆರವುಗೊಳಿಸಲಾಗಿದೆ',
@@ -71,7 +71,7 @@ const translations: Translations = {
     'fr-FR': 'Calculatrice effacée'
   },
   'The answer is': {
-    'en-US': 'The answer is',
+    'en-IN': 'The answer is',
     'hi-IN': 'उत्तर है',
     'ta-IN': 'விடை',
     'kn-IN': 'ಉತ್ತರ',
@@ -80,7 +80,7 @@ const translations: Translations = {
     'fr-FR': 'La réponse est'
   },
   'Please try again': {
-    'en-US': 'Please try again',
+    'en-IN': 'Please try again',
     'hi-IN': 'कृपया पुनः प्रयास करें',
     'ta-IN': 'தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
     'kn-IN': 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
@@ -89,7 +89,7 @@ const translations: Translations = {
     'fr-FR': 'Veuillez réessayer'
   },
   'Could not understand. Please try again': {
-    'en-US': 'Could not understand. Please try again',
+    'en-IN': 'Could not understand. Please try again',
     'hi-IN': 'समझ नहीं आया। कृपया पुनः प्रयास करें',
     'ta-IN': 'புரியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
     'kn-IN': 'ಅರ್ಥವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
@@ -98,13 +98,31 @@ const translations: Translations = {
     'fr-FR': 'Je n\'ai pas compris. Veuillez réessayer'
   },
   'Kannada voice not available': {
-    'en-US': 'Kannada voice not available',
+    'en-IN': 'Kannada voice not available',
     'hi-IN': 'कन्नड़ आवाज़ उपलब्ध नहीं',
     'ta-IN': 'கன்னட குரல் கிடைக்கவில்லை',
     'kn-IN': 'ಕನ್ನಡ ಧ್ವನಿ ಲಭ್ಯವಿಲ್ಲ',
     'te-IN': 'కన్నడ వాయిస్ అందుబాటులో లేదు',
     'es-ES': 'Voz de Kannada no disponible',
     'fr-FR': 'Voix Kannada non disponible'
+  },
+  'Your answer is': {
+    'en-IN': 'Your answer is',
+    'hi-IN': 'आपका उत्तर है',
+    'ta-IN': 'உங்கள் பதில்',
+    'kn-IN': 'ನಿಮ್ಮ ಉತ್ತರ',
+    'te-IN': 'మీ సమాధానం',
+    'es-ES': 'Tu respuesta es',
+    'fr-FR': 'Votre réponse est'
+  },
+  'Please say again': {
+    'en-IN': 'Please say again',
+    'hi-IN': 'कृपया दोबारा बोलिए',
+    'ta-IN': 'தயவு செய்து மீண்டும் சொல்லுங்கள்',
+    'kn-IN': 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಹೇಳಿ',
+    'te-IN': 'దయచేసి మళ్ళీ చెప్పండి',
+    'es-ES': 'Por favor, dilo de nuevo',
+    'fr-FR': 'Veuillez répéter'
   }
 };
 
@@ -178,9 +196,26 @@ const numberToWords: { [lang in Language]: (num: number) => string } = {
     }
     return num.toString();
   },
+  'en-IN': (num: number) => {
+    const englishNumbers: { [key: number]: string } = {
+      0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four',
+      5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine',
+      10: 'ten', 11: 'eleven', 12: 'twelve', 13: 'thirteen', 14: 'fourteen',
+      15: 'fifteen', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen',
+      20: 'twenty', 30: 'thirty', 40: 'forty', 50: 'fifty',
+      60: 'sixty', 70: 'seventy', 80: 'eighty', 90: 'ninety', 100: 'hundred'
+    };
+    
+    if (englishNumbers[num]) return englishNumbers[num];
+    if (num < 100) {
+      const tens = Math.floor(num / 10) * 10;
+      const ones = num % 10;
+      return `${englishNumbers[tens]} ${englishNumbers[ones]}`;
+    }
+    return num.toString();
+  },
   'es-ES': (num: number) => num.toString(),
-  'fr-FR': (num: number) => num.toString(),
-  'en-US': (num: number) => num.toString()
+  'fr-FR': (num: number) => num.toString()
 };
 
 export function translateNumber(num: number, language: Language): string {
@@ -214,7 +249,7 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
     'பதினெட்டு': '18', 'பத்தொன்பது': '19', 'இருபது': '20',
     'கூட்டல்': '+', 'சேர்': '+', 'கழித்தல்': '-', 'பெருக்கல்': '*', 'வகுத்தல்': '/'
   },
-  'en-US': {
+  'en-IN': {
     'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
     'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
     'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
