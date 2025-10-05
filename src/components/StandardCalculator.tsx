@@ -118,24 +118,51 @@ export function StandardCalculator() {
     if (isListening) {
       stopListening();
       setVoiceStatus('');
+      setLastHeard('');
     } else {
       setVoiceStatus(translate('Listening...', language));
       setLastHeard('');
       startListening((transcript) => {
+        // Clear status immediately
         setVoiceStatus('');
         
-        // Handle error signals
-        if (transcript === '__RECOGNITION_ERROR__' || transcript === '__EMPTY_TRANSCRIPT__') {
+        // Handle error signals - show error once, don't auto-restart
+        if (transcript === '__NO_SPEECH__' || transcript === '__EMPTY_TRANSCRIPT__') {
           const errorMsg = translate('I didn\'t hear anything', language);
           setLastHeard(errorMsg);
-          speak(translate('Please say again', language));
+          speak(errorMsg);
           toast({
             title: errorMsg,
             description: translate('Please try again', language),
+            variant: "destructive",
           });
           return;
         }
         
+        if (transcript === '__RECOGNITION_ERROR__') {
+          const errorMsg = translate('I didn\'t understand, please try again', language);
+          setLastHeard(errorMsg);
+          speak(errorMsg);
+          toast({
+            title: errorMsg,
+            description: translate('Please try again', language),
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (transcript === '__AUDIO_ERROR__') {
+          const errorMsg = 'Microphone access denied';
+          setLastHeard(errorMsg);
+          toast({
+            title: errorMsg,
+            description: 'Please allow microphone access',
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Valid transcript received
         setLastHeard(transcript);
         parseVoiceInput(transcript);
       });
@@ -145,28 +172,17 @@ export function StandardCalculator() {
   const parseVoiceInput = (transcript: string) => {
     console.log('Voice transcript received:', transcript);
     
-    if (!transcript || transcript.trim() === '') {
-      const errorMsg = translate('I didn\'t hear anything', language);
-      setLastHeard(errorMsg);
-      speak(translate('Please say again', language));
-      toast({
-        title: errorMsg,
-        description: translate('Please try again', language),
-      });
-      return;
-    }
-    
     // Use the translation utility to parse spoken math
     const processed = parseSpokenMath(transcript, language);
     console.log('Parsed expression:', processed);
     
-    if (!processed) {
+    if (!processed || processed.trim() === '') {
       const errorMsg = translate('I didn\'t understand, please try again', language);
-      setLastHeard(`${transcript} (${errorMsg})`);
       speak(errorMsg);
       toast({
         title: errorMsg,
-        description: translate('Please try again', language),
+        description: `Heard: "${transcript}"`,
+        variant: "destructive",
       });
       return;
     }
@@ -277,13 +293,14 @@ export function StandardCalculator() {
       console.error('Error evaluating expression:', error);
     }
 
-    // If nothing worked, show error
-    console.log('No valid input found, showing error toast');
+    // If nothing worked, show error once
+    console.log('No valid input found, showing error');
     const errorMsg = translate('I didn\'t understand, please try again', language);
     speak(errorMsg);
     toast({
       title: errorMsg,
       description: `Heard: "${transcript}"`,
+      variant: "destructive",
     });
   };
 
@@ -353,16 +370,16 @@ export function StandardCalculator() {
               
               {/* Voice Status Box */}
               {(voiceStatus || lastHeard) && (
-                <div className="bg-muted/50 rounded-lg p-3 text-sm border border-border/50">
+                <div className="bg-muted/50 rounded-lg p-3 text-sm border border-border/50 min-h-[60px]">
                   {voiceStatus && (
                     <div className="text-primary font-medium animate-pulse flex items-center gap-2">
-                      <Mic className="h-3 w-3" />
+                      <Mic className="h-3 w-3 animate-pulse" />
                       {voiceStatus}
                     </div>
                   )}
-                  {lastHeard && (
-                    <div className="text-muted-foreground">
-                      <span className="font-medium">Heard:</span> {lastHeard}
+                  {lastHeard && !voiceStatus && (
+                    <div className="text-foreground">
+                      <span className="font-medium text-muted-foreground">Heard:</span> {lastHeard}
                     </div>
                   )}
                 </div>

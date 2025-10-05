@@ -48,8 +48,9 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     const recognition = new SpeechRecognition();
     
     recognition.continuous = false;
-    recognition.interimResults = true; // Chrome fix: enables better transcript detection
+    recognition.interimResults = false;
     recognition.lang = language;
+    recognition.maxAlternatives = 1;
     
     recognition.onstart = () => {
       console.log('Speech recognition started');
@@ -65,8 +66,15 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       console.log('Speech recognition error:', event.error);
       setIsListening(false);
       
-      // Pass error signal to handler
-      if (event.error === 'no-speech' || event.error === 'audio-capture') {
+      // Handle specific errors without auto-restart
+      if (event.error === 'no-speech') {
+        onResult('__NO_SPEECH__');
+      } else if (event.error === 'audio-capture' || event.error === 'not-allowed') {
+        onResult('__AUDIO_ERROR__');
+      } else if (event.error === 'aborted') {
+        // User manually stopped - don't show error
+        return;
+      } else {
         onResult('__RECOGNITION_ERROR__');
       }
     };
@@ -76,12 +84,15 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       const transcript = event.results[0]?.transcript?.trim() || '';
       console.log('Transcript received:', transcript);
       
-      // Only call onResult if transcript is not empty
-      if (transcript) {
-        onResult(transcript);
-      } else {
-        console.log('Empty transcript, requesting retry');
+      // Stop listening immediately after getting result
+      setIsListening(false);
+      
+      // Handle empty or missing transcript
+      if (!transcript || transcript === '') {
+        console.log('Empty transcript received');
         onResult('__EMPTY_TRANSCRIPT__');
+      } else {
+        onResult(transcript);
       }
     };
     
