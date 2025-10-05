@@ -150,6 +150,15 @@ const translations: Translations = {
     'te-IN': 'వింటున్నాను...',
     'es-ES': 'Escuchando...',
     'fr-FR': 'En écoute...'
+  },
+  'Could not understand the calculation': {
+    'en-IN': 'Could not understand the calculation',
+    'hi-IN': 'गणना समझ में नहीं आई',
+    'ta-IN': 'கணக்கீடு புரியவில்லை',
+    'kn-IN': 'ಲೆಕ್ಕಾಚಾರ ಅರ್ಥವಾಗಲಿಲ್ಲ',
+    'te-IN': 'గణన అర్థం కాలేదు',
+    'es-ES': 'No pude entender el cálculo',
+    'fr-FR': 'Je n\'ai pas compris le calcul'
   }
 };
 
@@ -249,55 +258,114 @@ export function translateNumber(num: number, language: Language): string {
   return numberToWords[language](num);
 }
 
-// Word to number mapping for speech recognition
+// Enhanced word to number and operator mapping for speech recognition
 const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
   'kn-IN': {
+    // Numbers
     'ಸೊನ್ನೆ': '0', 'ಒಂದು': '1', 'ಎರಡು': '2', 'ಮೂರು': '3', 'ನಾಲ್ಕು': '4',
     'ಐದು': '5', 'ಆರು': '6', 'ಏಳು': '7', 'ಎಂಟು': '8', 'ಒಂಬತ್ತು': '9',
     'ಹತ್ತು': '10', 'ಹನ್ನೊಂದು': '11', 'ಹನ್ನೆರಡು': '12', 'ಹದಿಮೂರು': '13',
     'ಹದಿನಾಲ್ಕು': '14', 'ಹದಿನೈದು': '15', 'ಹದಿನಾರು': '16', 'ಹದಿನೇಳು': '17',
     'ಹದಿನೆಂಟು': '18', 'ಹತ್ತೊಂಬತ್ತು': '19', 'ಇಪ್ಪತ್ತು': '20',
-    'ಜೊತೆಗೆ': '+', 'ಮತ್ತು': '+', 'ಹೆಚ್ಚು': '+', 'ಕಳೆಯಿರಿ': '-', 'ಕಡಿಮೆ': '-',
-    'ಗುಣಿಸಿ': '*', 'ಭಾಗಿಸಿ': '/'
+    'ಮೂವತ್ತು': '30', 'ನಲವತ್ತು': '40', 'ಐವತ್ತು': '50', 'ಅರವತ್ತು': '60',
+    'ಎಪ್ಪತ್ತು': '70', 'ಎಂಬತ್ತು': '80', 'ತೊಂಬತ್ತು': '90',
+    'ನೂರು': '100', 'ಸಾವಿರ': '1000',
+    // Operators
+    'ಜೊತೆಗೆ': '+', 'ಜೋಡಿಸಿ': '+', 'ಮತ್ತು': '+', 'ಹೆಚ್ಚು': '+',
+    'ಕಳೆಯಿರಿ': '-', 'ಕಡಿಮೆ': '-', 'ಕಡಿತ': '-',
+    'ಗುಣಿಸಿ': '*', 'ಗುಣಾಕಾರ': '*',
+    'ಭಾಗಿಸಿ': '/', 'ಭಾಗಾಕಾರ': '/'
   },
   'hi-IN': {
+    // Numbers
     'शून्य': '0', 'एक': '1', 'दो': '2', 'तीन': '3', 'चार': '4',
     'पाँच': '5', 'छह': '6', 'सात': '7', 'आठ': '8', 'नौ': '9',
     'दस': '10', 'ग्यारह': '11', 'बारह': '12', 'तेरह': '13', 'चौदह': '14',
     'पंद्रह': '15', 'सोलह': '16', 'सत्रह': '17', 'अठारह': '18', 'उन्नीस': '19',
     'बीस': '20', 'तीस': '30', 'चालीस': '40', 'पचास': '50',
-    'साथ': '+', 'जोड़': '+', 'घटाएं': '-', 'गुणा': '*', 'भाग': '/'
+    'साठ': '60', 'सत्तर': '70', 'अस्सी': '80', 'नब्बे': '90',
+    'सौ': '100', 'हज़ार': '1000',
+    // Operators
+    'साथ': '+', 'जोड़': '+', 'प्लस': '+',
+    'घटाएं': '-', 'माइनस': '-',
+    'गुणा': '*', 'गुणन': '*',
+    'भाग': '/', 'भागो': '/'
   },
   'ta-IN': {
+    // Numbers
     'பூஜ்யம்': '0', 'ஒன்று': '1', 'இரண்டு': '2', 'மூன்று': '3', 'நான்கு': '4',
     'ஐந்து': '5', 'ஆறு': '6', 'ஏழு': '7', 'எட்டு': '8', 'ஒன்பது': '9',
     'பத்து': '10', 'பதினொன்று': '11', 'பன்னிரண்டு': '12', 'பதின்மூன்று': '13',
     'பதினான்கு': '14', 'பதினைந்து': '15', 'பதினாறு': '16', 'பதினேழு': '17',
     'பதினெட்டு': '18', 'பத்தொன்பது': '19', 'இருபது': '20',
-    'கூட்டல்': '+', 'சேர்': '+', 'கழித்தல்': '-', 'பெருக்கல்': '*', 'வகுத்தல்': '/'
+    'முப்பது': '30', 'நாற்பது': '40', 'ஐம்பது': '50', 'அறுபது': '60',
+    'எழுபது': '70', 'எண்பது': '80', 'தொண்ணூறு': '90',
+    'நூறு': '100', 'ஆயிரம்': '1000',
+    // Operators
+    'கூட்டல்': '+', 'சேர்': '+', 'கூட்டு': '+',
+    'கழித்தல்': '-', 'கழி': '-',
+    'பெருக்கல்': '*', 'பெருக்கு': '*',
+    'வகுத்தல்': '/', 'வகு': '/'
   },
   'en-IN': {
+    // Numbers
     'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
     'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
     'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
     'fourteen': '14', 'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
     'eighteen': '18', 'nineteen': '19', 'twenty': '20', 'thirty': '30',
     'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
-    'eighty': '80', 'ninety': '90', 'hundred': '100',
-    'plus': '+', 'add': '+', 'minus': '-', 'subtract': '-',
-    'times': '*', 'multiply': '*', 'into': '*', 'divided': '/', 'divide': '/'
+    'eighty': '80', 'ninety': '90', 'hundred': '100', 'thousand': '1000',
+    // Operators
+    'plus': '+', 'add': '+',
+    'minus': '-', 'subtract': '-',
+    'times': '*', 'multiply': '*', 'into': '*', 'multiplied': '*',
+    'divide': '/', 'divided': '/', 'by': '/'
   },
   'te-IN': {
+    // Numbers
     'సున్నా': '0', 'ఒకటి': '1', 'రెండు': '2', 'మూడు': '3', 'నాలుగు': '4',
     'ఐదు': '5', 'ఆరు': '6', 'ఏడు': '7', 'ఎనిమిది': '8', 'తొమ్మిది': '9',
     'పది': '10', 'పదకొండు': '11', 'పన్నెండు': '12', 'పదమూడు': '13',
     'పద్నాలుగు': '14', 'పదిహేను': '15', 'పదహారు': '16', 'పదిహేడు': '17',
     'పద్దెనిమిది': '18', 'పందొమ్మిది': '19', 'ఇరవై': '20',
-    'కూడిక': '+', 'చేర్చు': '+', 'తీసివేయు': '-', 'గుణించు': '*', 'భాగించు': '/'
+    'ముప్పై': '30', 'నలభై': '40', 'యాభై': '50', 'అరవై': '60',
+    'డెబ్బై': '70', 'ఎనభై': '80', 'తొంభై': '90',
+    'వంద': '100', 'వేయి': '1000',
+    // Operators
+    'కూడిక': '+', 'చేర్చు': '+', 'ప్లస్': '+',
+    'తీసివేయు': '-', 'మైనస్': '-',
+    'గుణించు': '*', 'గుణన': '*',
+    'భాగించు': '/', 'భాగం': '/'
   },
   'es-ES': {},
   'fr-FR': {}
 };
+
+// Parse compound numbers like "two hundred" → 200
+function parseCompoundNumbers(text: string, language: Language): string {
+  let processed = text.toLowerCase();
+  
+  if (language === 'en-IN') {
+    // Handle patterns like "two hundred", "three thousand", etc.
+    processed = processed
+      .replace(/(\w+)\s+hundred\s+(?:and\s+)?(\w+)/gi, (match, hundreds, ones) => {
+        const h = wordToNumber['en-IN'][hundreds] || hundreds;
+        const o = wordToNumber['en-IN'][ones] || ones;
+        return String(parseInt(h) * 100 + parseInt(o));
+      })
+      .replace(/(\w+)\s+hundred/gi, (match, hundreds) => {
+        const h = wordToNumber['en-IN'][hundreds] || hundreds;
+        return String(parseInt(h) * 100);
+      })
+      .replace(/(\w+)\s+thousand/gi, (match, thousands) => {
+        const t = wordToNumber['en-IN'][thousands] || thousands;
+        return String(parseInt(t) * 1000);
+      });
+  }
+  
+  return processed;
+}
 
 export function parseSpokenMath(text: string, language: Language): string {
   let processed = text.toLowerCase().trim();
@@ -306,6 +374,9 @@ export function parseSpokenMath(text: string, language: Language): string {
   if (!processed || processed === '__empty_transcript__' || processed === '__recognition_error__') {
     return '';
   }
+  
+  // First parse compound numbers
+  processed = parseCompoundNumbers(processed, language);
   
   // Replace spoken words with numbers/operators for the selected language
   const mapping = wordToNumber[language];
@@ -316,18 +387,12 @@ export function parseSpokenMath(text: string, language: Language): string {
     }
   }
   
-  // Handle English operator fallbacks (including "into" and "divided by")
+  // Handle common operator phrases (multi-word)
   processed = processed
-    .replace(/\bplus\b/gi, '+')
-    .replace(/\badd\b/gi, '+')
-    .replace(/\bminus\b/gi, '-')
-    .replace(/\bsubtract\b/gi, '-')
-    .replace(/\btimes\b/gi, '*')
-    .replace(/\bmultiply\b/gi, '*')
-    .replace(/\binto\b/gi, '*')
-    .replace(/\bdivided\s*by\b/gi, '/')
-    .replace(/\bdivide\b/gi, '/');
+    .replace(/\bdivided\s+by\b/gi, '/')
+    .replace(/\bmultiplied\s+by\b/gi, '*');
   
+  // Clean up spacing and return
   return processed.replace(/\s+/g, ' ').trim();
 }
 

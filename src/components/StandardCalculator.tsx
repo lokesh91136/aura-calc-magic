@@ -17,6 +17,7 @@ export function StandardCalculator() {
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<string>('');
   const [lastHeard, setLastHeard] = useState<string>('');
+  const [parsedExpression, setParsedExpression] = useState<string>('');
   
   const { isListening, language, setLanguage, startListening, stopListening, speak, isSupported } = useVoice();
   const { addToHistory } = useHistory();
@@ -103,6 +104,7 @@ export function StandardCalculator() {
     setWaitingForNext(false);
     setLastHeard('');
     setVoiceStatus('');
+    setParsedExpression('');
     speak(translate('Calculator cleared', language));
   };
 
@@ -177,7 +179,8 @@ export function StandardCalculator() {
     console.log('Parsed expression:', processed);
     
     if (!processed || processed.trim() === '') {
-      const errorMsg = translate('I didn\'t understand, please try again', language);
+      const errorMsg = translate('Could not understand the calculation', language);
+      setParsedExpression('');
       speak(errorMsg);
       toast({
         title: errorMsg,
@@ -187,106 +190,46 @@ export function StandardCalculator() {
       return;
     }
     
-    const cleanText = processed.toLowerCase().trim();
-    console.log('Clean text:', cleanText);
+    // Show the parsed expression
+    setParsedExpression(processed);
     
-    // Multi-language operation mapping
-    let processedText = cleanText
-      // English
-      .replace(/\bplus\b/g, '+')
-      .replace(/\badd\b/g, '+')
-      .replace(/\bminus\b/g, '-')
-      .replace(/\bsubtract\b/g, '-')
-      .replace(/\btimes\b/g, '*')
-      .replace(/\bmultiply\b/g, '*')
-      .replace(/\bmultiplied by\b/g, '*')
-      .replace(/\bdivided by\b/g, '/')
-      .replace(/\bdivide\b/g, '/')
-      .replace(/\bof\b/g, '*')
-      .replace(/\bpercent of\b/g, '% of')
-      // Hindi
-      .replace(/\bजोड़\b/g, '+')
-      .replace(/\bघटा\b/g, '-')
-      .replace(/\bगुणा\b/g, '*')
-      .replace(/\bभाग\b/g, '/')
-      .replace(/\bप्रतिशत\b/g, '%')
-      // Tamil  
-      .replace(/\bகூட்டல்\b/g, '+')
-      .replace(/\bकूत्तल्\b/g, '+')
-      .replace(/\bकोोत्तल्\b/g, '+')
-      .replace(/\bकूत्तल्\b/g, '+')
-      .replace(/\bकूत्तल्\b/g, '+')
-      .replace(/\bகழித்தல்\b/g, '-')
-      .replace(/\bபெருக்கல்\b/g, '*')
-      .replace(/\bவகுத்தல்\b/g, '/')
-      // Kannada
-      .replace(/\bಜೋಡಣೆ\b/g, '+')
-      .replace(/\bಕಳೆದುಕೊಳ್ಳುವುದು\b/g, '-')
-      .replace(/\bಗುಣಾಕಾರ\b/g, '*')
-      .replace(/\bಭಾಗಾಕಾರ\b/g, '/')
-      .replace(/\bಶೇಕಡಾ\b/g, '%')
-      // Spanish
-      .replace(/\bmás\b/g, '+')
-      .replace(/\bmenos\b/g, '-')
-      .replace(/\bpor\b/g, '*')
-      .replace(/\bdividido entre\b/g, '/')
-      .replace(/\bporciento de\b/g, '% of');
-
-    console.log('Processed text:', processedText);
+    const cleanText = processed.toLowerCase().trim();
+    console.log('Clean text for evaluation:', cleanText);
 
     try {
-      // Handle percentage calculations
-      if (processedText.includes('% of') || processedText.includes('%')) {
-        const percentMatch = processedText.match(/(\d+(?:\.\d+)?)\s*%\s*(?:of\s*)?(\d+(?:\.\d+)?)/);
-        if (percentMatch) {
-          const [, percent, number] = percentMatch;
-          const result = (parseFloat(percent) / 100) * parseFloat(number);
-          setDisplay(String(result));
-          addToHistory({
-            type: 'standard',
-            calculation: `${percent}% of ${number}`,
-            result,
-          });
-          speak(translate('Your answer is', language) + ' ' + result);
-          return;
-        }
-      }
-
-      // Replace common words with operators for evaluation
-      let expression = processedText
+      // Clean the expression for evaluation
+      let expression = cleanText
         .replace(/[×]/g, '*')
         .replace(/[÷]/g, '/')
         .replace(/\s+/g, ''); // Remove spaces
 
       console.log('Expression to evaluate:', expression);
 
-      // Extract and evaluate mathematical expression
-      const mathExpression = expression.match(/[\d+\-*/().%\s]+/g)?.[0];
-      if (mathExpression) {
-        // Safe evaluation using Function constructor (limited to basic math)
-        const sanitizedExpr = mathExpression.replace(/[^0-9+\-*/().%\s]/g, '');
-        if (sanitizedExpr && /^[\d+\-*/().%\s]+$/.test(sanitizedExpr)) {
-          const result = Function(`"use strict"; return (${sanitizedExpr})`)();
-          
-          if (typeof result === 'number' && !isNaN(result)) {
-            setDisplay(String(result));
-            addToHistory({
-              type: 'standard',
-              calculation: sanitizedExpr,
-              result,
-            });
-            speak(translate('Your answer is', language) + ' ' + result);
-            return;
-          }
-        }
+      // Sanitize and validate expression
+      const sanitizedExpr = expression.replace(/[^0-9+\-*/().]/g, '');
+      
+      if (!sanitizedExpr || !/[\d+\-*/]/.test(sanitizedExpr)) {
+        throw new Error('No valid math expression found');
       }
 
-      // Handle single numbers
-      const number = parseFloat(cleanText.replace(/[^\d.]/g, ''));
-      if (!isNaN(number) && number.toString() !== 'NaN') {
-        setDisplay(String(number));
-        speak(String(number));
-        return;
+      // Safe evaluation using Function constructor (limited to basic math)
+      if (/^[\d+\-*/().]+$/.test(sanitizedExpr)) {
+        const result = Function(`"use strict"; return (${sanitizedExpr})`)();
+        
+        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+          const roundedResult = Math.round(result * 1000000) / 1000000; // Round to 6 decimal places
+          
+          setDisplay(String(roundedResult));
+          addToHistory({
+            type: 'standard',
+            calculation: sanitizedExpr,
+            result: roundedResult,
+          });
+          
+          // Speak result in selected language
+          speak(translate('Your answer is', language) + ' ' + roundedResult);
+          return;
+        }
       }
 
     } catch (error) {
@@ -294,8 +237,9 @@ export function StandardCalculator() {
     }
 
     // If nothing worked, show error once
-    console.log('No valid input found, showing error');
-    const errorMsg = translate('I didn\'t understand, please try again', language);
+    console.log('No valid calculation found');
+    const errorMsg = translate('Could not understand the calculation', language);
+    setParsedExpression('');
     speak(errorMsg);
     toast({
       title: errorMsg,
@@ -369,8 +313,8 @@ export function StandardCalculator() {
               </div>
               
               {/* Voice Status Box */}
-              {(voiceStatus || lastHeard) && (
-                <div className="bg-muted/50 rounded-lg p-3 text-sm border border-border/50 min-h-[60px]">
+              {(voiceStatus || lastHeard || parsedExpression) && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm border border-border/50 min-h-[60px] space-y-1">
                   {voiceStatus && (
                     <div className="text-primary font-medium animate-pulse flex items-center gap-2">
                       <Mic className="h-3 w-3 animate-pulse" />
@@ -380,6 +324,11 @@ export function StandardCalculator() {
                   {lastHeard && !voiceStatus && (
                     <div className="text-foreground">
                       <span className="font-medium text-muted-foreground">Heard:</span> {lastHeard}
+                    </div>
+                  )}
+                  {parsedExpression && !voiceStatus && (
+                    <div className="text-primary font-mono">
+                      <span className="font-medium text-muted-foreground">Expression:</span> {parsedExpression}
                     </div>
                   )}
                 </div>
