@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalculatorButton } from '@/components/ui/calculator-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,16 +8,28 @@ import { useVoice } from '@/contexts/VoiceContext';
 import { useHistory } from '@/contexts/HistoryContext';
 import { useToast } from '@/hooks/use-toast';
 import { languageConfig, type Language } from '@/contexts/VoiceContext';
+import { translate, parseSpokenMath } from '@/utils/translations';
 
 export function StandardCalculator() {
   const [display, setDisplay] = useState('0');
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<string | null>(null);
   const [waitingForNext, setWaitingForNext] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState<string>('');
+  const [lastHeard, setLastHeard] = useState<string>('');
   
   const { isListening, language, setLanguage, startListening, stopListening, speak, isSupported } = useVoice();
   const { addToHistory } = useHistory();
   const { toast } = useToast();
+
+  // Request microphone permission on mount
+  useEffect(() => {
+    if (isSupported && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => console.log('Microphone access granted'))
+        .catch(err => console.error('Microphone access denied:', err));
+    }
+  }, [isSupported]);
 
   const inputNumber = (num: string) => {
     if (waitingForNext) {
@@ -79,8 +91,8 @@ export function StandardCalculator() {
         result: newValue,
       });
       
-      // Speak result
-      speak(`Result is ${newValue}`);
+      // Speak result in selected language
+      speak(translate(`Your answer is`, language) + ' ' + newValue);
     }
   };
 
@@ -89,7 +101,9 @@ export function StandardCalculator() {
     setPreviousValue(null);
     setOperation(null);
     setWaitingForNext(false);
-    speak('Calculator cleared');
+    setLastHeard('');
+    setVoiceStatus('');
+    speak(translate('Calculator cleared', language));
   };
 
   const backspace = () => {
@@ -103,9 +117,27 @@ export function StandardCalculator() {
   const handleVoiceInput = () => {
     if (isListening) {
       stopListening();
+      setVoiceStatus('');
     } else {
+      setVoiceStatus(translate('Listening...', language));
+      setLastHeard('');
       startListening((transcript) => {
-        parseVoiceInput(transcript.toLowerCase());
+        setVoiceStatus('');
+        
+        // Handle error signals
+        if (transcript === '__RECOGNITION_ERROR__' || transcript === '__EMPTY_TRANSCRIPT__') {
+          const errorMsg = translate('I didn\'t hear anything', language);
+          setLastHeard(errorMsg);
+          speak(translate('Please say again', language));
+          toast({
+            title: errorMsg,
+            description: translate('Please try again', language),
+          });
+          return;
+        }
+        
+        setLastHeard(transcript);
+        parseVoiceInput(transcript);
       });
     }
   };
@@ -113,7 +145,33 @@ export function StandardCalculator() {
   const parseVoiceInput = (transcript: string) => {
     console.log('Voice transcript received:', transcript);
     
-    const cleanText = transcript.toLowerCase().trim();
+    if (!transcript || transcript.trim() === '') {
+      const errorMsg = translate('I didn\'t hear anything', language);
+      setLastHeard(errorMsg);
+      speak(translate('Please say again', language));
+      toast({
+        title: errorMsg,
+        description: translate('Please try again', language),
+      });
+      return;
+    }
+    
+    // Use the translation utility to parse spoken math
+    const processed = parseSpokenMath(transcript, language);
+    console.log('Parsed expression:', processed);
+    
+    if (!processed) {
+      const errorMsg = translate('I didn\'t understand, please try again', language);
+      setLastHeard(`${transcript} (${errorMsg})`);
+      speak(errorMsg);
+      toast({
+        title: errorMsg,
+        description: translate('Please try again', language),
+      });
+      return;
+    }
+    
+    const cleanText = processed.toLowerCase().trim();
     console.log('Clean text:', cleanText);
     
     // Multi-language operation mapping
@@ -173,7 +231,7 @@ export function StandardCalculator() {
             calculation: `${percent}% of ${number}`,
             result,
           });
-          speak(String(result));
+          speak(translate('Your answer is', language) + ' ' + result);
           return;
         }
       }
@@ -201,8 +259,7 @@ export function StandardCalculator() {
               calculation: sanitizedExpr,
               result,
             });
-            // Simple numeric response only
-            speak(String(result));
+            speak(translate('Your answer is', language) + ' ' + result);
             return;
           }
         }
@@ -222,9 +279,11 @@ export function StandardCalculator() {
 
     // If nothing worked, show error
     console.log('No valid input found, showing error toast');
+    const errorMsg = translate('I didn\'t understand, please try again', language);
+    speak(errorMsg);
     toast({
-      title: "Voice command not recognized",
-      description: `I heard: "${transcript}". Try saying "10 plus 20" or "50 percent of 200"`,
+      title: errorMsg,
+      description: `Heard: "${transcript}"`,
     });
   };
 
@@ -292,6 +351,23 @@ export function StandardCalculator() {
                 </Select>
               </div>
               
+              {/* Voice Status Box */}
+              {(voiceStatus || lastHeard) && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm border border-border/50">
+                  {voiceStatus && (
+                    <div className="text-primary font-medium animate-pulse flex items-center gap-2">
+                      <Mic className="h-3 w-3" />
+                      {voiceStatus}
+                    </div>
+                  )}
+                  {lastHeard && (
+                    <div className="text-muted-foreground">
+                      <span className="font-medium">Heard:</span> {lastHeard}
+                    </div>
+                  )}
+                </div>
+              )}
+              
               {/* Voice Control Buttons */}
               <div className="flex gap-2">
                 <Button
@@ -306,7 +382,7 @@ export function StandardCalculator() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => speak(display)}
+                  onClick={() => speak(translate('Your answer is', language) + ' ' + display)}
                 >
                   <Volume2 className="h-4 w-4" />
                 </Button>

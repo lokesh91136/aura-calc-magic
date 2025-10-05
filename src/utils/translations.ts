@@ -123,6 +123,33 @@ const translations: Translations = {
     'te-IN': 'దయచేసి మళ్ళీ చెప్పండి',
     'es-ES': 'Por favor, dilo de nuevo',
     'fr-FR': 'Veuillez répéter'
+  },
+  'I didn\'t hear anything': {
+    'en-IN': 'I didn\'t hear anything',
+    'hi-IN': 'मुझे कुछ सुनाई नहीं दिया',
+    'ta-IN': 'நான் எதையும் கேட்கவில்லை',
+    'kn-IN': 'ನನಗೆ ಏನೂ ಕೇಳಿಸಲಿಲ್ಲ',
+    'te-IN': 'నాకు ఏమీ వినిపించలేదు',
+    'es-ES': 'No escuché nada',
+    'fr-FR': 'Je n\'ai rien entendu'
+  },
+  'I didn\'t understand, please try again': {
+    'en-IN': 'I didn\'t understand, please try again',
+    'hi-IN': 'मैं समझ नहीं पाया, कृपया पुनः प्रयास करें',
+    'ta-IN': 'எனக்குப் புரியவில்லை, தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
+    'kn-IN': 'ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ, ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    'te-IN': 'నాకు అర్థం కాలేదు, దయచేసి మళ్ళీ ప్రయత్నించండి',
+    'es-ES': 'No entendí, por favor intenta de nuevo',
+    'fr-FR': 'Je n\'ai pas compris, veuillez réessayer'
+  },
+  'Listening...': {
+    'en-IN': 'Listening...',
+    'hi-IN': 'सुन रहा हूं...',
+    'ta-IN': 'கேட்கிறேன்...',
+    'kn-IN': 'ಕೇಳುತ್ತಿದ್ದೇನೆ...',
+    'te-IN': 'వింటున్నాను...',
+    'es-ES': 'Escuchando...',
+    'fr-FR': 'En écoute...'
   }
 };
 

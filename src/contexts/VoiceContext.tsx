@@ -48,7 +48,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     const recognition = new SpeechRecognition();
     
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true; // Chrome fix: enables better transcript detection
     recognition.lang = language;
     
     recognition.onstart = () => {
