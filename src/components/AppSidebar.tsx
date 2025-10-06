@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen, GraduationCap, CalendarCheck, Award, TrendingDown, CheckCircle } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen, GraduationCap, CalendarCheck, Award, TrendingDown, CheckCircle, Calendar, Banknote, Receipt, DollarSign, PiggyBank } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -25,6 +25,11 @@ const calculators = [
   { title: 'Scientific', url: '/scientific', icon: Sigma },
   { title: 'SIP Calculator', url: '/sip', icon: TrendingUp },
   { title: 'EMI Calculator', url: '/emi', icon: Home },
+  { title: 'Age & Date', url: '/age-calculator', icon: Calendar },
+  { title: 'Loan Repayment', url: '/loan-calculator', icon: Banknote },
+  { title: 'Tax Calculator', url: '/tax-calculator', icon: Receipt },
+  { title: 'Currency Converter', url: '/currency-converter', icon: DollarSign },
+  { title: 'Savings Goal', url: '/savings-goal', icon: PiggyBank },
   { title: 'Percentage', url: '/percentage', icon: Percent },
   { title: 'Tally', url: '/tally', icon: List },
   { title: 'Math Quiz', url: '/math-quiz', icon: Brain },

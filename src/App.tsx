@@ -15,6 +15,11 @@ import { ScientificCalculatorPage } from "./pages/ScientificCalculatorPage";
 import StudyModePage from "./pages/StudyModePage";
 import SIPPage from "./pages/SIPPage";
 import EMIPage from "./pages/EMIPage";
+import AgeCalculatorPage from "./pages/AgeCalculatorPage";
+import LoanCalculatorPage from "./pages/LoanCalculatorPage";
+import TaxCalculatorPage from "./pages/TaxCalculatorPage";
+import CurrencyConverterPage from "./pages/CurrencyConverterPage";
+import SavingsGoalPage from "./pages/SavingsGoalPage";
 import PercentagePage from "./pages/PercentagePage";
 import TallyPage from "./pages/TallyPage";
 import MathQuizPage from "./pages/MathQuizPage";
@@ -54,6 +59,11 @@ const App = () => (
                           <Route path="/scientific" element={<ScientificCalculatorPage />} />
                           <Route path="/sip" element={<SIPPage />} />
                           <Route path="/emi" element={<EMIPage />} />
+                          <Route path="/age-calculator" element={<AgeCalculatorPage />} />
+                          <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
+                          <Route path="/tax-calculator" element={<TaxCalculatorPage />} />
+                          <Route path="/currency-converter" element={<CurrencyConverterPage />} />
+                          <Route path="/savings-goal" element={<SavingsGoalPage />} />
                           <Route path="/percentage" element={<PercentagePage />} />
                           <Route path="/tally" element={<TallyPage />} />
                           <Route path="/math-quiz" element={<MathQuizPage />} />

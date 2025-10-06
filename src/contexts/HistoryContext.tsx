@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface HistoryItem {
   id: string;
-  type: 'standard' | 'sip' | 'emi' | 'percentage' | 'tally' | 'scientific' | 'marks-percentage' | 'attendance' | 'gpa' | 'cgpa' | 'grade';
+  type: 'standard' | 'sip' | 'emi' | 'percentage' | 'tally' | 'scientific' | 'marks-percentage' | 'attendance' | 'gpa' | 'cgpa' | 'grade' | 'age' | 'loan' | 'tax' | 'currency' | 'savings';
   calculation: string;
   result: string | number;
   timestamp: Date;
