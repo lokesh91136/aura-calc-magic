@@ -129,25 +129,12 @@ export function StandardCalculator() {
         setVoiceStatus('');
         
         // Handle error signals - show error once, don't auto-restart
-        if (transcript === '__NO_SPEECH__' || transcript === '__EMPTY_TRANSCRIPT__') {
-          const errorMsg = translate('I didn\'t hear anything', language);
+        if (transcript === '__NO_SPEECH__') {
+          const errorMsg = 'No speech detected. Click mic to try again.';
           setLastHeard(errorMsg);
           speak(errorMsg);
           toast({
             title: errorMsg,
-            description: translate('Please try again', language),
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        if (transcript === '__RECOGNITION_ERROR__') {
-          const errorMsg = translate('I didn\'t understand, please try again', language);
-          setLastHeard(errorMsg);
-          speak(errorMsg);
-          toast({
-            title: errorMsg,
-            description: translate('Please try again', language),
             variant: "destructive",
           });
           return;

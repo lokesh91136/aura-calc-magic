@@ -75,7 +75,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         // User manually stopped - don't show error
         return;
       } else {
-        onResult('__RECOGNITION_ERROR__');
+        onResult('__NO_SPEECH__');
       }
     };
     
@@ -87,10 +87,10 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       // Stop listening immediately after getting result
       setIsListening(false);
       
-      // Handle empty or missing transcript
-      if (!transcript || transcript === '') {
-        console.log('Empty transcript received');
-        onResult('__EMPTY_TRANSCRIPT__');
+      // Handle empty, missing, or too short transcript (background noise)
+      if (!transcript || transcript === '' || transcript.length < 2) {
+        console.log('Empty or too short transcript received');
+        onResult('__NO_SPEECH__');
       } else {
         onResult(transcript);
       }
