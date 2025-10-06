@@ -342,26 +342,52 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
   'fr-FR': {}
 };
 
-// Parse compound numbers like "two hundred" → 200
+// Parse compound numbers like "two hundred" → 200, "twenty five" → 25
 function parseCompoundNumbers(text: string, language: Language): string {
   let processed = text.toLowerCase();
   
   if (language === 'en-IN') {
-    // Handle patterns like "two hundred", "three thousand", etc.
+    // First handle hundred/thousand patterns
     processed = processed
       .replace(/(\w+)\s+hundred\s+(?:and\s+)?(\w+)/gi, (match, hundreds, ones) => {
         const h = wordToNumber['en-IN'][hundreds] || hundreds;
         const o = wordToNumber['en-IN'][ones] || ones;
-        return String(parseInt(h) * 100 + parseInt(o));
+        const hNum = parseInt(h);
+        const oNum = parseInt(o);
+        if (!isNaN(hNum) && !isNaN(oNum)) {
+          return String(hNum * 100 + oNum);
+        }
+        return match;
       })
       .replace(/(\w+)\s+hundred/gi, (match, hundreds) => {
         const h = wordToNumber['en-IN'][hundreds] || hundreds;
-        return String(parseInt(h) * 100);
+        const hNum = parseInt(h);
+        if (!isNaN(hNum)) {
+          return String(hNum * 100);
+        }
+        return match;
       })
       .replace(/(\w+)\s+thousand/gi, (match, thousands) => {
         const t = wordToNumber['en-IN'][thousands] || thousands;
-        return String(parseInt(t) * 1000);
+        const tNum = parseInt(t);
+        if (!isNaN(tNum)) {
+          return String(tNum * 1000);
+        }
+        return match;
       });
+    
+    // Handle compound tens like "twenty five" → 25, "thirty seven" → 37
+    const tensWords = ['twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    const onesWords = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+    
+    for (const tens of tensWords) {
+      for (const ones of onesWords) {
+        const pattern = new RegExp(`\\b${tens}\\s+${ones}\\b`, 'gi');
+        const tensNum = parseInt(wordToNumber['en-IN'][tens]);
+        const onesNum = parseInt(wordToNumber['en-IN'][ones]);
+        processed = processed.replace(pattern, String(tensNum + onesNum));
+      }
+    }
   }
   
   return processed;
@@ -371,11 +397,17 @@ export function parseSpokenMath(text: string, language: Language): string {
   let processed = text.toLowerCase().trim();
   
   // Handle empty or error signals
-  if (!processed || processed === '__empty_transcript__' || processed === '__recognition_error__') {
+  if (!processed || processed === '__empty_transcript__' || processed === '__recognition_error__' || processed === '__no_speech__') {
     return '';
   }
   
-  // First parse compound numbers
+  // Handle multi-word operator phrases first (before individual word replacement)
+  processed = processed
+    .replace(/\bdivided\s+by\b/gi, ' / ')
+    .replace(/\bmultiplied\s+by\b/gi, ' * ')
+    .replace(/\bmultiply\s+by\b/gi, ' * ');
+  
+  // Parse compound numbers (e.g., "twenty five" → 25)
   processed = parseCompoundNumbers(processed, language);
   
   // Replace spoken words with numbers/operators for the selected language
@@ -387,13 +419,16 @@ export function parseSpokenMath(text: string, language: Language): string {
     }
   }
   
-  // Handle common operator phrases (multi-word)
+  // Clean up extra spaces and normalize operators
   processed = processed
-    .replace(/\bdivided\s+by\b/gi, '/')
-    .replace(/\bmultiplied\s+by\b/gi, '*');
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\s*\+\s*/g, '+')
+    .replace(/\s*-\s*/g, '-')
+    .replace(/\s*\*\s*/g, '*')
+    .replace(/\s*\/\s*/g, '/');
   
-  // Clean up spacing and return
-  return processed.replace(/\s+/g, ' ').trim();
+  return processed;
 }
 
 export function translate(text: string, language: Language): string {

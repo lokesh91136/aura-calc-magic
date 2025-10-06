@@ -184,7 +184,7 @@ export function StandardCalculator() {
     console.log('Clean text for evaluation:', cleanText);
 
     try {
-      // Clean the expression for evaluation
+      // Replace math symbols with standard operators
       let expression = cleanText
         .replace(/[×]/g, '*')
         .replace(/[÷]/g, '/')
@@ -192,38 +192,49 @@ export function StandardCalculator() {
 
       console.log('Expression to evaluate:', expression);
 
-      // Sanitize and validate expression
+      // Strict sanitization - only allow numbers and basic operators
       const sanitizedExpr = expression.replace(/[^0-9+\-*/().]/g, '');
       
-      if (!sanitizedExpr || !/[\d+\-*/]/.test(sanitizedExpr)) {
-        throw new Error('No valid math expression found');
+      // Validate: must contain at least one digit and one operator
+      if (!sanitizedExpr || !/\d/.test(sanitizedExpr)) {
+        throw new Error('No valid numbers found');
+      }
+      
+      // Check if it's a valid math expression pattern
+      if (!/^[\d+\-*/().]+$/.test(sanitizedExpr)) {
+        throw new Error('Invalid characters in expression');
+      }
+
+      // Prevent potential injection by checking for dangerous patterns
+      if (/[a-zA-Z]|__|constructor|prototype|eval|function/i.test(sanitizedExpr)) {
+        throw new Error('Invalid expression pattern');
       }
 
       // Safe evaluation using Function constructor (limited to basic math)
-      if (/^[\d+\-*/().]+$/.test(sanitizedExpr)) {
-        const result = Function(`"use strict"; return (${sanitizedExpr})`)();
+      const result = Function(`"use strict"; return (${sanitizedExpr})`)();
+      
+      if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+        const roundedResult = Math.round(result * 1000000) / 1000000; // Round to 6 decimal places
         
-        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
-          const roundedResult = Math.round(result * 1000000) / 1000000; // Round to 6 decimal places
-          
-          setDisplay(String(roundedResult));
-          addToHistory({
-            type: 'standard',
-            calculation: sanitizedExpr,
-            result: roundedResult,
-          });
-          
-          // Speak result in selected language
-          speak(translate('Your answer is', language) + ' ' + roundedResult);
-          return;
-        }
+        setDisplay(String(roundedResult));
+        addToHistory({
+          type: 'standard',
+          calculation: sanitizedExpr,
+          result: roundedResult,
+        });
+        
+        // Speak result in selected language
+        speak(translate('Your answer is', language) + ' ' + roundedResult);
+        return;
+      } else {
+        throw new Error('Invalid calculation result');
       }
 
     } catch (error) {
       console.error('Error evaluating expression:', error);
     }
 
-    // If nothing worked, show error once
+    // If evaluation failed, show error once
     console.log('No valid calculation found');
     const errorMsg = translate('Could not understand the calculation', language);
     setParsedExpression('');
