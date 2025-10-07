@@ -53,45 +53,50 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     recognition.maxAlternatives = 1;
     
     recognition.onstart = () => {
-      console.log('Speech recognition started');
+      console.log('🎤 Speech recognition started | Language:', language);
       setIsListening(true);
     };
     
     recognition.onend = () => {
-      console.log('Speech recognition ended');
+      console.log('🎤 Speech recognition ended | Language:', language);
       setIsListening(false);
     };
     
     recognition.onerror = (event: any) => {
-      console.log('Speech recognition error:', event.error);
+      console.log('🎤 Speech recognition error:', event.error, '| Language:', language);
       setIsListening(false);
       
       // Handle specific errors without auto-restart
       if (event.error === 'no-speech') {
+        console.log('⚠️ No speech detected');
         onResult('__NO_SPEECH__');
       } else if (event.error === 'audio-capture' || event.error === 'not-allowed') {
+        console.log('❌ Audio capture error or permission denied');
         onResult('__AUDIO_ERROR__');
       } else if (event.error === 'aborted') {
         // User manually stopped - don't show error
+        console.log('⏹️ Recognition aborted by user');
         return;
       } else {
+        console.log('⚠️ Unknown error, treating as no speech');
         onResult('__NO_SPEECH__');
       }
     };
     
     recognition.onresult = (event: any) => {
-      console.log('Speech recognition result event:', event);
+      console.log('🎤 Speech recognition result event | Language:', language);
       const transcript = event.results[0]?.transcript?.trim() || '';
-      console.log('Transcript received:', transcript);
+      console.log('✅ Transcript received:', transcript, '| Length:', transcript.length);
       
       // Stop listening immediately after getting result
       setIsListening(false);
       
       // Handle empty, missing, or too short transcript (background noise)
       if (!transcript || transcript === '' || transcript.length < 2) {
-        console.log('Empty or too short transcript received');
+        console.log('⚠️ Empty or too short transcript - likely background noise');
         onResult('__NO_SPEECH__');
       } else {
+        console.log('✅ Valid transcript - processing:', transcript);
         onResult(transcript);
       }
     };
@@ -113,90 +118,123 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   }, [recognition]);
 
   const speak = useCallback((text: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      console.log('Speech synthesis not supported');
+      return;
+    }
 
     // Translate text to selected language
     const translatedText = translate(text, language);
-    console.log('Speaking text:', translatedText, 'in language:', language);
+    console.log('🎤 Voice Assistant - Speaking:', translatedText, '| Language:', language);
 
     const synth = window.speechSynthesis;
+    
+    // Cancel any ongoing speech immediately to prevent loops/overlaps
+    try {
+      synth.cancel();
+    } catch (e) {
+      console.error('Error canceling speech:', e);
+    }
+
     const utterance = new SpeechSynthesisUtterance(translatedText);
     utterance.lang = language;
     utterance.rate = 0.9;
+    utterance.volume = 1.0;
 
-    const assignBestVoice = () => {
+    const assignBestVoice = (): boolean => {
       const voices = synth.getVoices();
-      console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
+      console.log('🔊 Available voices:', voices.length, '| Searching for:', language);
       
-      // For Kannada, ONLY use kn-IN voices - no fallbacks
+      // For Kannada, find kn-IN voices
       if (language === 'kn-IN') {
         const kannadaVoice = voices.find(voice =>
           voice.lang === 'kn-IN' || 
-          voice.lang.toLowerCase().includes('kn') || 
+          voice.lang.toLowerCase().startsWith('kn') || 
           voice.name.toLowerCase().includes('kannada')
         );
         
         if (kannadaVoice) {
-          console.log('Using Kannada voice:', kannadaVoice.name);
+          console.log('✅ Using Kannada voice:', kannadaVoice.name, '| Lang:', kannadaVoice.lang);
           utterance.voice = kannadaVoice;
+          return true;
         } else {
-          console.error('Kannada voice not available');
-          // Show error message instead of speaking in wrong language
-          const errorMsg = translate('Kannada voice not available', language);
-          console.log(errorMsg);
-          return; // Don't speak if no Kannada voice
+          console.error('❌ Kannada voice not available on this device');
+          return false;
         }
-      } else {
-        // Try exact match first
-        let matchingVoice = voices.find(voice =>
-          voice.lang === language
-        );
+      }
+      
+      // For other Indian languages, try exact match first
+      if (language === 'en-IN' || language === 'hi-IN' || language === 'ta-IN' || language === 'te-IN') {
+        let matchingVoice = voices.find(voice => voice.lang === language);
         
-        // For Indian languages (including English), try broader match
-        if (!matchingVoice && (language === 'en-IN' || language === 'hi-IN' || language === 'ta-IN' || language === 'te-IN')) {
+        // Try broader language code match
+        if (!matchingVoice) {
           const langCode = language.split('-')[0];
           matchingVoice = voices.find(voice => 
             voice.lang.toLowerCase().includes(langCode) ||
-            voice.lang.startsWith(langCode)
-          );
-        }
-        
-        // For other languages, try language code match
-        if (!matchingVoice) {
-          const langCode = language.split('-')[0];
-          matchingVoice = voices.find(voice =>
-            voice.lang.startsWith(langCode)
+            voice.lang.toLowerCase().startsWith(langCode)
           );
         }
         
         if (matchingVoice) {
-          console.log('Using voice:', matchingVoice.name, 'for language:', matchingVoice.lang);
+          console.log('✅ Using voice:', matchingVoice.name, '| Lang:', matchingVoice.lang);
           utterance.voice = matchingVoice;
-        } else {
-          console.log('No matching voice found for language:', language, 'using default');
+          return true;
         }
+      }
+      
+      // For other languages (Spanish, French, etc.)
+      const langCode = language.split('-')[0];
+      const matchingVoice = voices.find(voice =>
+        voice.lang.startsWith(langCode)
+      );
+      
+      if (matchingVoice) {
+        console.log('✅ Using voice:', matchingVoice.name, '| Lang:', matchingVoice.lang);
+        utterance.voice = matchingVoice;
+        return true;
+      }
+      
+      console.log('⚠️ No matching voice found for:', language, '- using default');
+      return true; // Use default voice
+    };
+
+    utterance.onstart = () => console.log('🔊 Speech started');
+    utterance.onend = () => {
+      console.log('✅ Speech ended - no repetition');
+    };
+    utterance.onerror = (event) => {
+      console.error('❌ Speech error:', (event as any).error);
+    };
+
+    const speakNow = () => {
+      const voiceAssigned = assignBestVoice();
+      
+      // For Kannada, only speak if voice is available
+      if (language === 'kn-IN' && !voiceAssigned) {
+        console.log('⚠️ Skipping speech - Kannada voice not available');
+        return;
+      }
+      
+      // Speak once only
+      try {
+        synth.speak(utterance);
+        console.log('🎤 Speech utterance queued');
+      } catch (e) {
+        console.error('❌ Error speaking:', e);
       }
     };
 
-    assignBestVoice();
-
-    utterance.onstart = () => console.log('Speech started');
-    utterance.onend = () => console.log('Speech ended');
-    utterance.onerror = (event) => console.log('Speech error:', (event as any).error);
-
-    const speakNow = () => {
-      // Cancel any queued/ongoing speech before speaking to prevent overlaps/loops
-      try { synth.cancel(); } catch {}
-      synth.speak(utterance);
-    };
-
+    // Handle voice loading
     if (synth.getVoices().length === 0) {
-      synth.onvoiceschanged = () => {
-        // One-time handler to avoid multiple speaks when event fires repeatedly
-        synth.onvoiceschanged = null;
-        assignBestVoice();
+      console.log('⏳ Waiting for voices to load...');
+      // Set one-time handler to avoid multiple invocations
+      const loadVoices = () => {
+        synth.onvoiceschanged = null; // Remove handler immediately
+        console.log('✅ Voices loaded:', synth.getVoices().length);
         speakNow();
       };
+      synth.onvoiceschanged = loadVoices;
     } else {
       speakNow();
     }

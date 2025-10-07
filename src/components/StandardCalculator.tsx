@@ -130,7 +130,20 @@ export function StandardCalculator() {
         
         // Handle error signals - show error once, don't auto-restart
         if (transcript === '__NO_SPEECH__') {
-          const errorMsg = 'No speech detected. Click mic to try again.';
+          const errorMsg = translate('I didn\'t hear anything', language);
+          const retryMsg = translate('Please say again', language);
+          setLastHeard(errorMsg);
+          speak(errorMsg);
+          toast({
+            title: errorMsg,
+            description: retryMsg,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (transcript === '__AUDIO_ERROR__') {
+          const errorMsg = translate('Could not understand. Please try again', language);
           setLastHeard(errorMsg);
           speak(errorMsg);
           toast({
@@ -140,18 +153,8 @@ export function StandardCalculator() {
           return;
         }
         
-        if (transcript === '__AUDIO_ERROR__') {
-          const errorMsg = 'Microphone access denied';
-          setLastHeard(errorMsg);
-          toast({
-            title: errorMsg,
-            description: 'Please allow microphone access',
-            variant: "destructive",
-          });
-          return;
-        }
-        
         // Valid transcript received
+        console.log('✅ Valid transcript received:', transcript, '| Language:', language);
         setLastHeard(transcript);
         parseVoiceInput(transcript);
       });
@@ -159,11 +162,11 @@ export function StandardCalculator() {
   };
 
   const parseVoiceInput = (transcript: string) => {
-    console.log('Voice transcript received:', transcript);
+    console.log('🎤 Voice transcript received:', transcript, '| Language:', language);
     
     // Use the translation utility to parse spoken math
     const processed = parseSpokenMath(transcript, language);
-    console.log('Parsed expression:', processed);
+    console.log('📊 Parsed expression:', processed);
     
     if (!processed || processed.trim() === '') {
       const errorMsg = translate('Could not understand the calculation', language);
@@ -171,7 +174,7 @@ export function StandardCalculator() {
       speak(errorMsg);
       toast({
         title: errorMsg,
-        description: `Heard: "${transcript}"`,
+        description: `${translate('Please try again', language)}`,
         variant: "destructive",
       });
       return;
@@ -181,7 +184,7 @@ export function StandardCalculator() {
     setParsedExpression(processed);
     
     const cleanText = processed.toLowerCase().trim();
-    console.log('Clean text for evaluation:', cleanText);
+    console.log('🔍 Clean text for evaluation:', cleanText);
 
     try {
       // Replace math symbols with standard operators
@@ -190,7 +193,7 @@ export function StandardCalculator() {
         .replace(/[÷]/g, '/')
         .replace(/\s+/g, ''); // Remove spaces
 
-      console.log('Expression to evaluate:', expression);
+      console.log('➗ Expression to evaluate:', expression);
 
       // Strict sanitization - only allow numbers and basic operators
       const sanitizedExpr = expression.replace(/[^0-9+\-*/().]/g, '');
@@ -216,6 +219,7 @@ export function StandardCalculator() {
       if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
         const roundedResult = Math.round(result * 1000000) / 1000000; // Round to 6 decimal places
         
+        console.log('✅ Calculation result:', roundedResult);
         setDisplay(String(roundedResult));
         addToHistory({
           type: 'standard',
@@ -223,25 +227,27 @@ export function StandardCalculator() {
           result: roundedResult,
         });
         
-        // Speak result in selected language
-        speak(translate('Your answer is', language) + ' ' + roundedResult);
+        // Speak result in selected language - speak once only
+        const resultMessage = `${translate('Your answer is', language)} ${roundedResult}`;
+        console.log('🔊 Speaking result:', resultMessage);
+        speak(resultMessage);
         return;
       } else {
         throw new Error('Invalid calculation result');
       }
 
     } catch (error) {
-      console.error('Error evaluating expression:', error);
+      console.error('❌ Error evaluating expression:', error);
     }
 
     // If evaluation failed, show error once
-    console.log('No valid calculation found');
+    console.log('⚠️ No valid calculation found');
     const errorMsg = translate('Could not understand the calculation', language);
     setParsedExpression('');
     speak(errorMsg);
     toast({
       title: errorMsg,
-      description: `Heard: "${transcript}"`,
+      description: `${translate('Please try again', language)}`,
       variant: "destructive",
     });
   };
