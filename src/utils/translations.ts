@@ -159,6 +159,15 @@ const translations: Translations = {
     'te-IN': 'గణన అర్థం కాలేదు',
     'es-ES': 'No pude entender el cálculo',
     'fr-FR': 'Je n\'ai pas compris le calcul'
+  },
+  'Something went wrong — please try again': {
+    'en-IN': 'Something went wrong — please try again',
+    'hi-IN': 'कुछ गलत हो गया — कृपया पुनः प्रयास करें',
+    'ta-IN': 'ஏதோ தவறு நடந்தது — தயவுசெய்து மீண்டும் முயற்சிக்கவும்',
+    'kn-IN': 'ಏನೋ ತಪ್ಪಾಗಿದೆ — ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    'te-IN': 'ఏదో తప్పు జరిగింది — దయచేసి మళ్ళీ ప్రయత్నించండి',
+    'es-ES': 'Algo salió mal — por favor, inténtalo de nuevo',
+    'fr-FR': 'Quelque chose s\'est mal passé — veuillez réessayer'
   }
 };
 
@@ -316,11 +325,8 @@ const wordToNumber: { [lang in Language]: { [word: string]: string } } = {
     'eighteen': '18', 'nineteen': '19', 'twenty': '20', 'thirty': '30',
     'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
     'eighty': '80', 'ninety': '90', 'hundred': '100', 'thousand': '1000',
-    // Operators
-    'plus': '+', 'add': '+',
-    'minus': '-', 'subtract': '-',
-    'times': '*', 'multiply': '*', 'into': '*', 'multiplied': '*',
-    'divide': '/', 'divided': '/', 'by': '/'
+    // Note: operators are handled in parseSpokenMath before this mapping
+    // to avoid conflicts with multi-word phrases like "divided by"
   },
   'te-IN': {
     // Numbers
@@ -396,19 +402,40 @@ function parseCompoundNumbers(text: string, language: Language): string {
 export function parseSpokenMath(text: string, language: Language): string {
   let processed = text.toLowerCase().trim();
   
+  console.log('🔍 parseSpokenMath input:', { text, language });
+  
   // Handle empty or error signals
   if (!processed || processed === '__empty_transcript__' || processed === '__recognition_error__' || processed === '__no_speech__') {
+    console.log('⚠️ Empty or error signal detected');
     return '';
   }
   
   // Handle multi-word operator phrases first (before individual word replacement)
+  // This must be done before individual word replacement to avoid conflicts
   processed = processed
+    // Division phrases
     .replace(/\bdivided\s+by\b/gi, ' / ')
+    .replace(/\bover\b(?=\s+\d)/gi, ' / ') // "8 over 2" → "8 / 2"
+    // Multiplication phrases  
     .replace(/\bmultiplied\s+by\b/gi, ' * ')
-    .replace(/\bmultiply\s+by\b/gi, ' * ');
+    .replace(/\bmultiply\s+by\b/gi, ' * ')
+    .replace(/\btimes\b/gi, ' * ') // "5 times 6" → "5 * 6"
+    .replace(/\binto\b/gi, ' * ') // "5 into 6" → "5 * 6"
+    // Addition phrases
+    .replace(/\bplus\b/gi, ' + ')
+    .replace(/\badd\b/gi, ' + ')
+    .replace(/\band\b(?=\s*\d)/gi, ' + ') // "20 and 4" → "20 + 4" (only before numbers)
+    // Subtraction phrases
+    .replace(/\bminus\b/gi, ' - ')
+    .replace(/\bsubtract\b/gi, ' - ')
+    .replace(/\btake\s+away\b/gi, ' - ');
+  
+  console.log('📝 After operator replacement:', processed);
   
   // Parse compound numbers (e.g., "twenty five" → 25)
   processed = parseCompoundNumbers(processed, language);
+  
+  console.log('📊 After compound numbers:', processed);
   
   // Replace spoken words with numbers/operators for the selected language
   const mapping = wordToNumber[language];
@@ -419,14 +446,18 @@ export function parseSpokenMath(text: string, language: Language): string {
     }
   }
   
+  console.log('🔢 After word-to-number mapping:', processed);
+  
   // Clean up extra spaces and normalize operators
   processed = processed
     .replace(/\s+/g, ' ')
     .trim()
-    .replace(/\s*\+\s*/g, '+')
-    .replace(/\s*-\s*/g, '-')
-    .replace(/\s*\*\s*/g, '*')
-    .replace(/\s*\/\s*/g, '/');
+    .replace(/\s*\+\s*/g, ' + ')
+    .replace(/\s*-\s*/g, ' - ')
+    .replace(/\s*\*\s*/g, ' * ')
+    .replace(/\s*\/\s*/g, ' / ');
+  
+  console.log('✅ Final parsed expression:', processed);
   
   return processed;
 }

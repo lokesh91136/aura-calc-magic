@@ -187,43 +187,57 @@ export function StandardCalculator() {
     console.log('🔍 Clean text for evaluation:', cleanText);
 
     try {
-      // Replace math symbols with standard operators
+      // Replace math symbols and spaces to prepare for evaluation
       let expression = cleanText
         .replace(/[×]/g, '*')
         .replace(/[÷]/g, '/')
-        .replace(/\s+/g, ''); // Remove spaces
+        .replace(/\s+/g, ''); // Remove all spaces
 
       console.log('➗ Expression to evaluate:', expression);
 
-      // Strict sanitization - only allow numbers and basic operators
+      // Strict sanitization - only allow numbers, decimal points, and basic operators
       const sanitizedExpr = expression.replace(/[^0-9+\-*/().]/g, '');
       
-      // Validate: must contain at least one digit and one operator
+      console.log('🧹 Sanitized expression:', sanitizedExpr);
+      
+      // Validate: must contain at least one digit
       if (!sanitizedExpr || !/\d/.test(sanitizedExpr)) {
+        console.log('❌ No valid numbers found in expression');
         throw new Error('No valid numbers found');
       }
       
-      // Check if it's a valid math expression pattern
+      // Validate: must contain at least one operator to be a calculation
+      if (!/[+\-*/]/.test(sanitizedExpr)) {
+        console.log('❌ No operators found in expression');
+        throw new Error('No operators found');
+      }
+      
+      // Check if it's a valid math expression pattern (only numbers and operators)
       if (!/^[\d+\-*/().]+$/.test(sanitizedExpr)) {
+        console.log('❌ Invalid characters in expression');
         throw new Error('Invalid characters in expression');
       }
 
       // Prevent potential injection by checking for dangerous patterns
       if (/[a-zA-Z]|__|constructor|prototype|eval|function/i.test(sanitizedExpr)) {
+        console.log('❌ Dangerous pattern detected');
         throw new Error('Invalid expression pattern');
       }
 
       // Safe evaluation using Function constructor (limited to basic math)
+      console.log('🔐 Safely evaluating:', sanitizedExpr);
       const result = Function(`"use strict"; return (${sanitizedExpr})`)();
+      
+      console.log('📈 Evaluation result:', result, '| Type:', typeof result, '| isNaN:', isNaN(result), '| isFinite:', isFinite(result));
       
       if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
         const roundedResult = Math.round(result * 1000000) / 1000000; // Round to 6 decimal places
         
-        console.log('✅ Calculation result:', roundedResult);
+        console.log('✅ Calculation successful:', roundedResult);
         setDisplay(String(roundedResult));
         addToHistory({
           type: 'standard',
-          calculation: sanitizedExpr,
+          calculation: processed, // Use original parsed expression for history
           result: roundedResult,
         });
         
@@ -233,23 +247,24 @@ export function StandardCalculator() {
         speak(resultMessage);
         return;
       } else {
+        console.log('❌ Result is not a valid number');
         throw new Error('Invalid calculation result');
       }
 
     } catch (error) {
       console.error('❌ Error evaluating expression:', error);
+      
+      // Show specific error message
+      const errorMsg = translate('Something went wrong — please try again', language) || 'Something went wrong — please try again';
+      setParsedExpression('');
+      speak(errorMsg);
+      toast({
+        title: errorMsg,
+        description: `${translate('Please try again', language)}`,
+        variant: "destructive",
+      });
+      return;
     }
-
-    // If evaluation failed, show error once
-    console.log('⚠️ No valid calculation found');
-    const errorMsg = translate('Could not understand the calculation', language);
-    setParsedExpression('');
-    speak(errorMsg);
-    toast({
-      title: errorMsg,
-      description: `${translate('Please try again', language)}`,
-      variant: "destructive",
-    });
   };
 
   const buttons = [
