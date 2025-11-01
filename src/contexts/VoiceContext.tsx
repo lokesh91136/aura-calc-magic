@@ -29,28 +29,31 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const [isListening, setIsListening] = useState(false);
   const [language, setLanguage] = useState<Language>('en-IN');
   const [recognition, setRecognition] = useState<any>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const isSupported = typeof window !== 'undefined' && 
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
   const startListening = useCallback((onResult: (text: string) => void) => {
     if (!isSupported || typeof window === 'undefined') {
-      console.log('Speech recognition not supported or no window');
+      console.log('❌ Speech recognition not supported or no window');
       return;
     }
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      console.log('SpeechRecognition not available');
+      console.log('❌ SpeechRecognition not available');
       return;
     }
     
+    console.log('🎤 Creating new speech recognition instance | Language:', language, '| Retry count:', retryCount);
     const recognition = new SpeechRecognition();
     
+    // Improved settings for better speech detection
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true; // Enable interim results for better detection
     recognition.lang = language;
-    recognition.maxAlternatives = 1;
+    recognition.maxAlternatives = 3; // Increased for better accuracy
     
     recognition.onstart = () => {
       console.log('🎤 Speech recognition started | Language:', language);
@@ -63,57 +66,108 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     };
     
     recognition.onerror = (event: any) => {
-      console.log('🎤 Speech recognition error:', event.error, '| Language:', language);
+      console.log('❌ Speech recognition error:', event.error, '| Language:', language, '| Retry count:', retryCount);
       setIsListening(false);
       
-      // Handle specific errors without auto-restart
+      // Handle specific errors with retry logic
       if (event.error === 'no-speech') {
-        console.log('⚠️ No speech detected');
+        console.log('⚠️ No speech detected | Retry count:', retryCount);
+        // Auto-retry once if this is first attempt
+        if (retryCount === 0) {
+          console.log('🔄 Auto-retrying speech recognition (attempt 2)...');
+          setRetryCount(1);
+          setTimeout(() => startListening(onResult), 300);
+          return;
+        }
+        setRetryCount(0);
         onResult('__NO_SPEECH__');
       } else if (event.error === 'audio-capture' || event.error === 'not-allowed') {
         console.log('❌ Audio capture error or permission denied');
+        setRetryCount(0);
         onResult('__AUDIO_ERROR__');
       } else if (event.error === 'aborted') {
-        // User manually stopped - don't show error
         console.log('⏹️ Recognition aborted by user');
+        setRetryCount(0);
         return;
       } else {
-        console.log('⚠️ Unknown error, treating as no speech');
+        console.log('⚠️ Unknown error:', event.error);
+        // Auto-retry once for unknown errors too
+        if (retryCount === 0) {
+          console.log('🔄 Auto-retrying after unknown error...');
+          setRetryCount(1);
+          setTimeout(() => startListening(onResult), 300);
+          return;
+        }
+        setRetryCount(0);
         onResult('__NO_SPEECH__');
       }
     };
     
     recognition.onresult = (event: any) => {
-      console.log('🎤 Speech recognition result event | Language:', language);
-      const transcript = event.results[0]?.transcript?.trim() || '';
-      console.log('✅ Transcript received:', transcript, '| Length:', transcript.length);
+      console.log('🎤 Speech recognition result event | Language:', language, '| Results count:', event.results.length);
       
-      // Stop listening immediately after getting result
-      setIsListening(false);
+      // Get the final result (last result is usually the most complete)
+      let transcript = '';
+      let isFinal = false;
       
-      // Handle empty, missing, or too short transcript (background noise)
-      if (!transcript || transcript === '' || transcript.length < 2) {
-        console.log('⚠️ Empty or too short transcript - likely background noise');
+      // Check all results to get the most complete transcript
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        const resultTranscript = result[0]?.transcript?.trim() || '';
+        console.log(`  Result ${i}: "${resultTranscript}" | Final: ${result.isFinal} | Confidence: ${result[0]?.confidence || 0}`);
+        
+        if (resultTranscript.length > transcript.length) {
+          transcript = resultTranscript;
+          isFinal = result.isFinal;
+        }
+      }
+      
+      console.log('✅ Best transcript:', transcript, '| Length:', transcript.length, '| Final:', isFinal, '| Retry count:', retryCount);
+      
+      // Only process if we have actual content (removed overly strict length check)
+      if (!transcript || transcript === '') {
+        console.log('⚠️ Empty transcript received');
+        // Auto-retry once if this is first attempt and transcript is empty
+        if (retryCount === 0) {
+          console.log('🔄 Auto-retrying for empty transcript...');
+          setRetryCount(1);
+          setTimeout(() => startListening(onResult), 300);
+          return;
+        }
+        setIsListening(false);
+        setRetryCount(0);
         onResult('__NO_SPEECH__');
       } else {
-        console.log('✅ Valid transcript - processing:', transcript);
+        console.log('✅ Valid transcript detected - processing:', transcript);
+        setIsListening(false);
+        setRetryCount(0);
         onResult(transcript);
       }
     };
     
     try {
+      console.log('🚀 Starting speech recognition with config:', {
+        language,
+        continuous: false,
+        interimResults: true,
+        maxAlternatives: 3,
+        retryCount
+      });
       recognition.start();
       setRecognition(recognition);
     } catch (error) {
-      console.error('Error starting speech recognition:', error);
+      console.error('❌ Error starting speech recognition:', error);
       setIsListening(false);
+      setRetryCount(0);
     }
-  }, [language, isSupported]);
+  }, [language, isSupported, retryCount]);
 
   const stopListening = useCallback(() => {
     if (recognition) {
+      console.log('⏹️ Manually stopping speech recognition');
       recognition.stop();
       setIsListening(false);
+      setRetryCount(0);
     }
   }, [recognition]);
 
