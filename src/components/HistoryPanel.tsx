@@ -65,7 +65,7 @@ export function HistoryPanel() {
               </Card>
             ) : (
               history.map((item) => {
-                const Icon = typeIcons[item.type];
+                const Icon = typeIcons[item.type] || Calculator;
                 return (
                   <Card key={item.id} className="bg-gradient-number border-border/20 transition-all hover:shadow-lg">
                     <CardContent className="p-4">

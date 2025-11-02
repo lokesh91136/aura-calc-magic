@@ -130,26 +130,16 @@ export function StandardCalculator() {
         
         // Handle error signals - show error once, don't auto-restart
         if (transcript === '__NO_SPEECH__') {
-          const errorMsg = translate('I didn\'t hear anything', language);
-          const retryMsg = translate('Please say again', language);
+          const errorMsg = "Couldn't understand, please try again";
           setLastHeard(errorMsg);
-          speak(errorMsg);
-          toast({
-            title: errorMsg,
-            description: retryMsg,
-            variant: "destructive",
-          });
+          setVoiceStatus(errorMsg);
           return;
         }
         
         if (transcript === '__AUDIO_ERROR__') {
-          const errorMsg = translate('Could not understand. Please try again', language);
+          const errorMsg = "Couldn't understand, please try again";
           setLastHeard(errorMsg);
-          speak(errorMsg);
-          toast({
-            title: errorMsg,
-            variant: "destructive",
-          });
+          setVoiceStatus(errorMsg);
           return;
         }
         
@@ -169,14 +159,9 @@ export function StandardCalculator() {
     console.log('📊 Parsed expression:', processed);
     
     if (!processed || processed.trim() === '') {
-      const errorMsg = translate('Could not understand the calculation', language);
+      const errorMsg = "Couldn't understand, please try again";
       setParsedExpression('');
-      speak(errorMsg);
-      toast({
-        title: errorMsg,
-        description: `${translate('Please try again', language)}`,
-        variant: "destructive",
-      });
+      setVoiceStatus(errorMsg);
       return;
     }
     
@@ -254,15 +239,10 @@ export function StandardCalculator() {
     } catch (error) {
       console.error('❌ Error evaluating expression:', error);
       
-      // Show specific error message
-      const errorMsg = translate('Something went wrong — please try again', language) || 'Something went wrong — please try again';
+      // Show friendly error message
+      const errorMsg = "Couldn't understand, please try again";
       setParsedExpression('');
-      speak(errorMsg);
-      toast({
-        title: errorMsg,
-        description: `${translate('Please try again', language)}`,
-        variant: "destructive",
-      });
+      setVoiceStatus(errorMsg);
       return;
     }
   };
