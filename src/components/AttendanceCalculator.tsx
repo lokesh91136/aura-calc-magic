@@ -197,13 +197,13 @@ export function AttendanceCalculator() {
 
           {overallResult && (
             <Card className="bg-gradient-card border-border/20 animate-scale-in shadow-aura">
-              <CardContent className="pt-6 space-y-4">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Overall Average Attendance</p>
-                  <p className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <CardContent className="pt-6 space-y-6">
+                <div className="text-center space-y-3">
+                  <p className="text-base text-muted-foreground font-medium">Overall Average Attendance</p>
+                  <p className="text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     {overallResult.average.toFixed(2)}%
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-muted-foreground">
                     {overallResult.totalAttended} / {overallResult.totalClasses} total classes
                   </p>
                 </div>
