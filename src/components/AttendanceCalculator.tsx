@@ -200,11 +200,16 @@ export function AttendanceCalculator() {
               <CardContent className="pt-6 space-y-6">
                 <div className="text-center space-y-3">
                   <p className="text-base text-muted-foreground font-medium">Overall Average Attendance</p>
-                  <p className="text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <p className="text-6xl font-bold text-primary" style={{
+                    background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>
                     {overallResult.average.toFixed(2)}%
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {overallResult.totalAttended} / {overallResult.totalClasses} total classes
+                    ({overallResult.totalAttended} / {overallResult.totalClasses} total classes)
                   </p>
                 </div>
 
