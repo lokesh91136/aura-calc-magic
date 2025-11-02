@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { useHistory } from '@/contexts/HistoryContext';
 import { CalendarCheck, Plus, X } from 'lucide-react';
 
@@ -156,11 +157,19 @@ export function AttendanceCalculator() {
                   </div>
 
                   {subject.percentage !== undefined && (
-                    <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border/20 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Attendance</p>
-                      <p className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                        {subject.percentage.toFixed(2)}%
-                      </p>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-foreground">
+                          {subject.name} — {subject.percentage.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="relative">
+                        <Progress value={subject.percentage} className="h-3 bg-muted/50" />
+                        <div 
+                          className="absolute top-0 left-0 h-3 rounded-full bg-gradient-primary transition-all duration-500"
+                          style={{ width: `${Math.min(subject.percentage, 100)}%` }}
+                        />
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -199,14 +208,23 @@ export function AttendanceCalculator() {
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-4 border-t border-border/20">
+                <div className="space-y-3 pt-4 border-t border-border/20">
                   <p className="text-sm font-semibold text-foreground mb-3">Subject Breakdown:</p>
                   {subjects.filter(s => s.percentage !== undefined).map(subject => (
-                    <div key={subject.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                      <span className="text-sm text-foreground">{subject.name}</span>
-                      <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
-                        {subject.percentage?.toFixed(2)}%
-                      </span>
+                    <div key={subject.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">{subject.name}</span>
+                        <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
+                          {subject.percentage?.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <Progress value={subject.percentage} className="h-2 bg-muted/50" />
+                        <div 
+                          className="absolute top-0 left-0 h-2 rounded-full bg-gradient-primary transition-all duration-500"
+                          style={{ width: `${Math.min(subject.percentage, 100)}%` }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
