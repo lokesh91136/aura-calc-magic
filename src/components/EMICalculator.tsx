@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
 import { useHistory } from '@/contexts/HistoryContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface EMIResult {
   emi: number;
@@ -20,9 +23,63 @@ export function EMICalculator() {
   const [result, setResult] = useState<EMIResult | null>(null);
   const { addToHistory } = useHistory();
 
+  // Currency converter states
+  const [usdAmount, setUsdAmount] = useState<string>('100');
+  const [inrAmount, setInrAmount] = useState<string>('');
+  const [exchangeRate, setExchangeRate] = useState<number>(0);
+  const [isLoadingRate, setIsLoadingRate] = useState<boolean>(false);
+
   useEffect(() => {
     calculateEMI();
   }, [loanAmount, interestRate, tenure]);
+
+  // Fetch exchange rate on mount
+  useEffect(() => {
+    fetchExchangeRate();
+  }, []);
+
+  // Update INR when USD or rate changes
+  useEffect(() => {
+    if (exchangeRate > 0 && usdAmount) {
+      const usd = parseFloat(usdAmount);
+      if (!isNaN(usd)) {
+        setInrAmount((usd * exchangeRate).toFixed(2));
+      }
+    }
+  }, [usdAmount, exchangeRate]);
+
+  const fetchExchangeRate = async () => {
+    setIsLoadingRate(true);
+    try {
+      const response = await fetch('https://v6.exchangerate-api.com/v6/0140668426024454d8ba28e3/latest/USD');
+      const data = await response.json();
+      if (data.result === 'success') {
+        setExchangeRate(data.conversion_rates.INR);
+        toast.success('Exchange rate updated');
+      } else {
+        toast.error('Failed to fetch exchange rate');
+      }
+    } catch (error) {
+      toast.error('Error fetching exchange rate');
+      console.error('Exchange rate fetch error:', error);
+    } finally {
+      setIsLoadingRate(false);
+    }
+  };
+
+  const handleUsdChange = (value: string) => {
+    setUsdAmount(value);
+  };
+
+  const handleInrChange = (value: string) => {
+    setInrAmount(value);
+    if (exchangeRate > 0 && value) {
+      const inr = parseFloat(value);
+      if (!isNaN(inr)) {
+        setUsdAmount((inr / exchangeRate).toFixed(2));
+      }
+    }
+  };
 
   const calculateEMI = () => {
     const P = parseFloat(loanAmount);
@@ -220,6 +277,64 @@ export function EMICalculator() {
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Currency Converter Section */}
+      <Card className="bg-gradient-primary border-0 shadow-2xl text-white">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-bold text-white">
+              Live Currency Converter
+            </CardTitle>
+            <Button
+              onClick={fetchExchangeRate}
+              disabled={isLoadingRate}
+              variant="secondary"
+              size="icon"
+              className="bg-white/20 hover:bg-white/30 text-white border-0"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoadingRate ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="usd" className="text-white/90 text-base font-semibold">💵 USD</Label>
+              <Input
+                id="usd"
+                type="number"
+                value={usdAmount}
+                onChange={(e) => handleUsdChange(e.target.value)}
+                className="h-12 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                placeholder="Enter USD amount"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="inr" className="text-white/90 text-base font-semibold">🇮🇳 INR</Label>
+              <Input
+                id="inr"
+                type="number"
+                value={inrAmount}
+                onChange={(e) => handleInrChange(e.target.value)}
+                className="h-12 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                placeholder="Enter INR amount"
+              />
+            </div>
+          </div>
+
+          {exchangeRate > 0 && (
+            <div className="text-center space-y-1">
+              <p className="text-lg font-semibold text-white">
+                Live Rate: 1 USD = ₹{exchangeRate.toFixed(2)}
+              </p>
+              <p className="text-xs text-white/60">
+                Powered by ExchangeRate API
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
