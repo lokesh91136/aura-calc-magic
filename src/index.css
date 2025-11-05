@@ -115,6 +115,8 @@ All colors MUST be HSL for perfect theming.
     --gradient-number: linear-gradient(135deg, hsl(240 30% 20%), hsl(220 25% 18%));
     --gradient-background: linear-gradient(135deg, hsl(230 25% 8%), hsl(280 30% 12%));
     --gradient-card: linear-gradient(135deg, hsl(230 30% 12%), hsl(240 25% 15%));
+    --gradient-savings: linear-gradient(135deg, hsl(274 25% 12%), hsl(268 30% 20%));
+    --gradient-neon: linear-gradient(135deg, hsl(328 100% 50%), hsl(23 100% 50%));
     
     /* Dark mode neon shadows */
     --shadow-button: 0 4px 20px hsl(270 100% 75% / 0.4);
@@ -151,6 +153,8 @@ All colors MUST be HSL for perfect theming.
   .bg-gradient-number { background: var(--gradient-number); }
   .bg-gradient-background { background: var(--gradient-background); }
   .bg-gradient-card { background: var(--gradient-card); }
+  .bg-gradient-savings { background: var(--gradient-savings); }
+  .bg-gradient-neon { background: var(--gradient-neon); }
   
   /* AuraCalc Shadow System */
   .shadow-aura { box-shadow: var(--shadow-button); }
@@ -189,6 +193,32 @@ All colors MUST be HSL for perfect theming.
     to { 
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+  
+  .animate-ring-fill {
+    animation: ringFill 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  
+  @keyframes ringFill {
+    from {
+      stroke-dashoffset: 339.292;
+    }
+    to {
+      stroke-dashoffset: var(--ring-offset);
+    }
+  }
+  
+  .animate-neon-glow {
+    animation: neonGlow 1.5s ease-in-out infinite alternate;
+  }
+  
+  @keyframes neonGlow {
+    from { 
+      filter: drop-shadow(0 0 8px hsl(328 100% 50% / 0.4)) drop-shadow(0 0 12px hsl(23 100% 50% / 0.3));
+    }
+    to { 
+      filter: drop-shadow(0 0 16px hsl(328 100% 50% / 0.6)) drop-shadow(0 0 24px hsl(23 100% 50% / 0.5));
     }
   }
 }
