@@ -1,97 +1,95 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { useHistory } from '@/contexts/HistoryContext';
-import { CalendarCheck, Plus, X } from 'lucide-react';
-
-interface Subject {
-  id: string;
-  name: string;
-  totalClasses: string;
-  attendedClasses: string;
-  percentage?: number;
-}
+import { CalendarCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function AttendanceCalculator() {
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { id: '1', name: 'Subject 1', totalClasses: '', attendedClasses: '' }
-  ]);
-  const [overallResult, setOverallResult] = useState<{
-    average: number;
-    totalClasses: number;
-    totalAttended: number;
-  } | null>(null);
+  const [totalClasses, setTotalClasses] = useState('');
+  const [attendedClasses, setAttendedClasses] = useState('');
+  const [percentage, setPercentage] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [progress, setProgress] = useState(0);
   const { addToHistory } = useHistory();
 
-  const addSubject = () => {
-    const newId = (subjects.length + 1).toString();
-    setSubjects([...subjects, {
-      id: newId,
-      name: `Subject ${newId}`,
-      totalClasses: '',
-      attendedClasses: ''
-    }]);
-  };
+  useEffect(() => {
+    if (isAnimating && percentage !== null) {
+      const duration = 2000; // 2 seconds
+      const steps = 60;
+      const increment = percentage / steps;
+      let currentStep = 0;
 
-  const removeSubject = (id: string) => {
-    if (subjects.length > 1) {
-      setSubjects(subjects.filter(s => s.id !== id));
+      const interval = setInterval(() => {
+        currentStep++;
+        setProgress(Math.min(currentStep * increment, percentage));
+
+        if (currentStep >= steps) {
+          clearInterval(interval);
+          setIsAnimating(false);
+        }
+      }, duration / steps);
+
+      return () => clearInterval(interval);
     }
+  }, [isAnimating, percentage]);
+
+  const getColorByPercentage = (pct: number) => {
+    if (pct < 60) return '#FF4D4D'; // Red
+    if (pct <= 80) return '#FFC107'; // Yellow
+    return '#4CAF50'; // Green
   };
 
-  const updateSubject = (id: string, field: keyof Subject, value: string) => {
-    setSubjects(subjects.map(s => 
-      s.id === id ? { ...s, [field]: value } : s
-    ));
+  const getAvatarData = (pct: number) => {
+    if (pct < 60) return {
+      emoji: '😴',
+      message: 'You missed too many classes!',
+      textColor: 'text-red-400'
+    };
+    if (pct <= 80) return {
+      emoji: '😐',
+      message: 'Good, but you can do better!',
+      textColor: 'text-yellow-400'
+    };
+    return {
+      emoji: '😎',
+      message: 'Excellent attendance! Keep it up!',
+      textColor: 'text-green-400'
+    };
   };
 
   const calculate = () => {
-    let totalClassesSum = 0;
-    let totalAttendedSum = 0;
-    let validSubjects = 0;
+    const total = parseFloat(totalClasses);
+    const attended = parseFloat(attendedClasses);
 
-    const updatedSubjects = subjects.map(subject => {
-      const total = parseFloat(subject.totalClasses);
-      const attended = parseFloat(subject.attendedClasses);
-
-      if (!isNaN(total) && !isNaN(attended) && total > 0 && attended >= 0) {
-        const percentage = (attended / total) * 100;
-        totalClassesSum += total;
-        totalAttendedSum += attended;
-        validSubjects++;
-        return { ...subject, percentage };
-      }
-      return subject;
-    });
-
-    if (validSubjects === 0) {
+    if (isNaN(total) || isNaN(attended) || total <= 0 || attended < 0) {
       return;
     }
 
-    setSubjects(updatedSubjects);
-
-    const overallPercentage = (totalAttendedSum / totalClassesSum) * 100;
-    setOverallResult({
-      average: overallPercentage,
-      totalClasses: totalClassesSum,
-      totalAttended: totalAttendedSum
-    });
+    const pct = (attended / total) * 100;
+    setPercentage(pct);
+    setProgress(0);
+    setIsAnimating(true);
 
     addToHistory({
       type: 'attendance',
-      calculation: `${validSubjects} subjects: ${totalAttendedSum}/${totalClassesSum} classes`,
-      result: `${overallPercentage.toFixed(2)}%`,
-      details: { subjects: updatedSubjects, overallPercentage }
+      calculation: `${attended}/${total} classes attended`,
+      result: `${pct.toFixed(2)}%`,
+      details: { totalClasses: total, attendedClasses: attended, percentage: pct }
     });
   };
 
   const reset = () => {
-    setSubjects([{ id: '1', name: 'Subject 1', totalClasses: '', attendedClasses: '' }]);
-    setOverallResult(null);
+    setTotalClasses('');
+    setAttendedClasses('');
+    setPercentage(null);
+    setProgress(0);
+    setIsAnimating(false);
   };
+
+  const avatarData = percentage !== null ? getAvatarData(percentage) : null;
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -103,139 +101,151 @@ export function AttendanceCalculator() {
             </div>
             <div>
               <CardTitle className="text-2xl">Attendance Percentage Calculator</CardTitle>
-              <CardDescription>Track your attendance and see how many classes you need</CardDescription>
+              <CardDescription>Track your attendance with animated results</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            {subjects.map((subject, index) => (
-              <Card key={subject.id} className="bg-gradient-number border-border/20 animate-scale-in">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <Input
-                      type="text"
-                      value={subject.name}
-                      onChange={(e) => updateSubject(subject.id, 'name', e.target.value)}
-                      className="font-semibold text-lg bg-background/50 border-border/20 flex-1 mr-2"
-                    />
-                    {subjects.length > 1 && (
-                      <Button
-                        onClick={() => removeSubject(subject.id)}
-                        variant="outline"
-                        size="icon"
-                        className="h-10 w-10"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor={`total-${subject.id}`}>Total Classes</Label>
-                      <Input
-                        id={`total-${subject.id}`}
-                        type="number"
-                        placeholder="Enter total"
-                        value={subject.totalClasses}
-                        onChange={(e) => updateSubject(subject.id, 'totalClasses', e.target.value)}
-                        className="bg-background/50 border-border/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`attended-${subject.id}`}>Attended</Label>
-                      <Input
-                        id={`attended-${subject.id}`}
-                        type="number"
-                        placeholder="Enter attended"
-                        value={subject.attendedClasses}
-                        onChange={(e) => updateSubject(subject.id, 'attendedClasses', e.target.value)}
-                        className="bg-background/50 border-border/20"
-                      />
-                    </div>
-                  </div>
-
-                  {subject.percentage !== undefined && (
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-foreground">
-                          {subject.name} — {subject.percentage.toFixed(1)}%
-                        </p>
-                      </div>
-                      <div className="relative">
-                        <Progress value={subject.percentage} className="h-3 bg-muted/50" />
-                        <div 
-                          className="absolute top-0 left-0 h-3 rounded-full bg-gradient-primary transition-all duration-500"
-                          style={{ width: `${Math.min(subject.percentage, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="total-classes">Total Classes</Label>
+              <Input
+                id="total-classes"
+                type="number"
+                placeholder="Enter total classes"
+                value={totalClasses}
+                onChange={(e) => setTotalClasses(e.target.value)}
+                className="bg-background/50 border-border/20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="attended-classes">Classes Attended</Label>
+              <Input
+                id="attended-classes"
+                type="number"
+                placeholder="Enter attended classes"
+                value={attendedClasses}
+                onChange={(e) => setAttendedClasses(e.target.value)}
+                className="bg-background/50 border-border/20"
+              />
+            </div>
           </div>
 
-          <Button
-            onClick={addSubject}
-            variant="outline"
-            className="w-full border-dashed"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Subject
-          </Button>
-
           <div className="flex gap-3">
-            <Button onClick={calculate} className="flex-1 bg-gradient-primary">
-              Calculate All
+            <Button onClick={calculate} className="flex-1 bg-gradient-primary hover:shadow-aura">
+              Calculate Attendance
             </Button>
             <Button onClick={reset} variant="outline">
               Reset
             </Button>
           </div>
 
-          {overallResult && (
-            <Card className="bg-gradient-card border-border/20 animate-scale-in shadow-aura">
-              <CardContent className="pt-6 space-y-6">
-                <div className="text-center space-y-3">
-                  <p className="text-base text-muted-foreground font-medium">Overall Average Attendance</p>
-                  <p className="text-6xl font-bold text-primary" style={{
-                    background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}>
-                    {overallResult.average.toFixed(2)}%
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    ({overallResult.totalAttended} / {overallResult.totalClasses} total classes)
-                  </p>
-                </div>
+          <AnimatePresence>
+            {percentage !== null && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="bg-gradient-card border-border/20 shadow-aura">
+                  <CardContent className="pt-8 pb-8">
+                    <div className="flex flex-col items-center space-y-6">
+                      {/* Circular Progress Ring */}
+                      <div className="relative w-64 h-64 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90">
+                          {/* Background Circle */}
+                          <circle
+                            cx="128"
+                            cy="128"
+                            r="110"
+                            stroke="hsl(var(--muted))"
+                            strokeWidth="12"
+                            fill="none"
+                            opacity="0.2"
+                          />
+                          {/* Progress Circle */}
+                          <motion.circle
+                            cx="128"
+                            cy="128"
+                            r="110"
+                            stroke={getColorByPercentage(percentage)}
+                            strokeWidth="12"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeDasharray={2 * Math.PI * 110}
+                            strokeDashoffset={2 * Math.PI * 110 * (1 - progress / 100)}
+                            initial={{ strokeDashoffset: 2 * Math.PI * 110 }}
+                            animate={{
+                              strokeDashoffset: 2 * Math.PI * 110 * (1 - progress / 100),
+                              filter: !isAnimating && progress === percentage 
+                                ? [
+                                    'drop-shadow(0 0 8px currentColor)',
+                                    'drop-shadow(0 0 16px currentColor)',
+                                    'drop-shadow(0 0 8px currentColor)'
+                                  ]
+                                : 'drop-shadow(0 0 4px currentColor)'
+                            }}
+                            transition={{
+                              strokeDashoffset: { duration: 2, ease: 'easeInOut' },
+                              filter: { 
+                                duration: 1.5, 
+                                repeat: !isAnimating && progress === percentage ? Infinity : 0,
+                                repeatType: 'reverse'
+                              }
+                            }}
+                            style={{
+                              filter: `drop-shadow(0 0 8px ${getColorByPercentage(percentage)})`
+                            }}
+                          />
+                        </svg>
+                        
+                        {/* Percentage Text */}
+                        <motion.div
+                          className="absolute inset-0 flex items-center justify-center"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3, duration: 0.5 }}
+                        >
+                          <p 
+                            className="text-6xl font-bold"
+                            style={{ color: getColorByPercentage(percentage) }}
+                          >
+                            {Math.round(progress)}%
+                          </p>
+                        </motion.div>
+                      </div>
 
-                <div className="space-y-3 pt-4 border-t border-border/20">
-                  <p className="text-sm font-semibold text-foreground mb-3">Subject Breakdown:</p>
-                  {subjects.filter(s => s.percentage !== undefined).map(subject => (
-                    <div key={subject.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">{subject.name}</span>
-                        <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
-                          {subject.percentage?.toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <Progress value={subject.percentage} className="h-2 bg-muted/50" />
-                        <div 
-                          className="absolute top-0 left-0 h-2 rounded-full bg-gradient-primary transition-all duration-500"
-                          style={{ width: `${Math.min(subject.percentage, 100)}%` }}
-                        />
-                      </div>
+                      {/* Avatar and Message */}
+                      {avatarData && !isAnimating && progress === percentage && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 2.2, duration: 0.5 }}
+                          className="flex flex-col items-center space-y-3 text-center"
+                        >
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 2.2, type: 'spring', stiffness: 200 }}
+                            className="text-8xl"
+                          >
+                            {avatarData.emoji}
+                          </motion.div>
+                          <p className={`text-xl font-semibold ${avatarData.textColor}`}>
+                            {avatarData.message}
+                          </p>
+                          <div className="text-sm text-muted-foreground pt-2">
+                            <p>Attended: {attendedClasses} / {totalClasses} classes</p>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </CardContent>
       </Card>
     </div>
