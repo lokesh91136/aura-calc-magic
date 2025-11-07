@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Home, Percent, List, Mic, Sun, Moon, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen, GraduationCap, CalendarCheck, Award, TrendingDown, CheckCircle, Calendar, Banknote, Receipt, DollarSign, PiggyBank } from 'lucide-react';
+import { Calculator, TrendingUp, Home, Percent, List, Mic, History, Bot, Brain, Trophy, MessageCircle, Sigma, BookOpen, GraduationCap, CalendarCheck, Award, TrendingDown, CheckCircle, Calendar, Banknote, Receipt, DollarSign, PiggyBank } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -13,7 +13,6 @@ import {
   SidebarHeader,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useVoice, languageConfig } from '@/contexts/VoiceContext';
 import { useHistory } from '@/contexts/HistoryContext';
 import { CalcBot } from '@/components/CalcBot';
@@ -49,14 +48,9 @@ const educationTools = [
 ];
 
 export function AppSidebar() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, isSupported: voiceSupported } = useVoice();
   const { setHistoryOpen } = useHistory();
   const [isChatBotOpen, setIsChatBotOpen] = useState(false);
-
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
 
   return (
     <Sidebar>
@@ -68,18 +62,8 @@ export function AppSidebar() {
             </h1>
           </div>
           
-          <div className="space-y-2">
-            <Button
-              variant="ghost" 
-              size="sm"
-              onClick={toggleTheme}
-              className="w-full justify-start"
-            >
-              {resolvedTheme === 'dark' ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-              {resolvedTheme === 'dark' ? 'Light' : 'Dark'} Mode
-            </Button>
-            
-            {voiceSupported && (
+          {voiceSupported && (
+            <div className="space-y-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Voice Language</label>
                 <Select value={language} onValueChange={setLanguage}>
@@ -95,8 +79,8 @@ export function AppSidebar() {
                   </SelectContent>
                 </Select>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </SidebarHeader>
 
