@@ -10,6 +10,7 @@ import { VoiceProvider } from "@/contexts/VoiceContext";
 import { HistoryProvider } from "@/contexts/HistoryContext";
 import { StudyProvider } from "@/contexts/StudyContext";
 import { HistoryPanel } from "@/components/HistoryPanel";
+import { FloatingChatBot } from "@/components/FloatingChatBot";
 import Index from "./pages/Index";
 import { ScientificCalculatorPage } from "./pages/ScientificCalculatorPage";
 import StudyModePage from "./pages/StudyModePage";
@@ -81,6 +82,7 @@ const App = () => (
                   </div>
                 </SidebarProvider>
                 <HistoryPanel />
+                <FloatingChatBot />
               </BrowserRouter>
             </TooltipProvider>
           </StudyProvider>
